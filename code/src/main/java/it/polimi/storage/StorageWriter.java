@@ -11,9 +11,8 @@ class StorageWriter {
 
     // Appends data to a given file
     public void append(String location, String string) {
-        location = adaptForWindows(location);
         if (fileExists(location)) {
-            try (FileWriter writer = new FileWriter(PATH + "/" + location, true)) {
+            try (FileWriter writer = new FileWriter(adaptForWindows(PATH + "/" + location), true)) {
                 writer.write(string);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -23,7 +22,6 @@ class StorageWriter {
 
     // Creates a file and all the necessary directories to complete the path
     public boolean createFile(String location) {
-        location = adaptForWindows(location);
         if (!fileExists(location)) {
             // If the location contains a non-existing directory, create it
             String dir = location.substring(0, location.lastIndexOf('/'));
@@ -33,7 +31,7 @@ class StorageWriter {
 
             // Finally create the file
             try {
-                Files.createFile(Paths.get(PATH + "/" + location));
+                Files.createFile(Paths.get(adaptForWindows(PATH + "/" + location)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -62,9 +60,8 @@ class StorageWriter {
 
     // Deletes a file
     private void deleteFile(String location) {
-        location = adaptForWindows(location);
         try {
-            Files.deleteIfExists(Paths.get(PATH + "/" + location));
+            Files.deleteIfExists(Paths.get(adaptForWindows(PATH + "/" + location)));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -72,19 +69,18 @@ class StorageWriter {
 
     // Checks if a file exists or not
     private boolean fileExists(String location) {
-        location = adaptForWindows(location);
-        return Files.exists(Paths.get(PATH + "/" + location));
+        return Files.exists(Paths.get(adaptForWindows(PATH + "/" + location)));
     }
 
     // Checks if a directory exists or not
     public boolean directoryExists(String location) {
-        location = adaptForWindows(location);
-        return Files.exists(Paths.get(PATH + "/" + location))
-                && Files.isDirectory(Paths.get(PATH + "/" + location));
+        location = adaptForWindows(PATH + "/" + location);
+        return Files.exists(Paths.get(location))
+                && Files.isDirectory(Paths.get(location));
     }
 
     // Supports windows machines...
-    private String adaptForWindows(String path){
+    private String adaptForWindows(String path) {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
             path.replace('/', '\\');
