@@ -23,9 +23,13 @@ public class StableStorage {
         sw.append(roomId + "/messages.txt", "Chat room created successfully");
 
         StringBuilder sb = new StringBuilder() // Build the first vector clock: (0,0,...,0,0)
-                .append("[")
-                .repeat("0,", size - 1)
-                .append("0]\n");
+                .append("[");
+
+               // .repeat("0,", size - 1)
+        for(int i = 0; i < size - 1; i++) {
+            sb.append("0,");
+        }
+        sb.append("0]\n");
         sw.append(roomId + "/vector_clocks.txt", sb.toString());
         sw.append(roomId + "/last_vc.txt", sb.toString());
     }

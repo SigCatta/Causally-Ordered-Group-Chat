@@ -74,7 +74,7 @@ class StorageWriter {
 
     // Checks if a directory exists or not
     public boolean directoryExists(String location) {
-        location = adaptForWindows(PATH + "/" + location);
+        location = adaptForWindows(location);
         return Files.exists(Paths.get(location))
                 && Files.isDirectory(Paths.get(location));
     }
@@ -83,7 +83,7 @@ class StorageWriter {
     private String adaptForWindows(String path) {
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("win")) {
-            path.replace('/', '\\');
+            path = path.replace('/', '\\');
         }
         return path;
     }
