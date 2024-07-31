@@ -21,7 +21,7 @@ public class Main {
         // Start the server thread
         new Thread(() -> startListening(ip, port)).start();
 
-        readLine();
+       readLine();
     }
 
     public static void startListening(String ip, int port) {
