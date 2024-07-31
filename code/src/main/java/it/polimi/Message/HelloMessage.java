@@ -1,6 +1,6 @@
 package it.polimi.Message;
 
-import it.polimi.Controller.Controller;
+import it.polimi.States.RoomState;
 
 import java.io.Serializable;
 
@@ -10,7 +10,7 @@ public class HelloMessage extends Message implements Serializable {
         super(content);
     }
     @Override
-    public void process(Controller controller) {
-        controller.handle(this);
+    public void process(RoomState state) {
+        state.handle(this);
     }
 }

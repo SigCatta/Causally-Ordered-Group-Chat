@@ -1,6 +1,6 @@
 package it.polimi.Message;
 
-import it.polimi.Controller.Controller;
+import it.polimi.States.RoomState;
 
 import java.io.Serializable;
 
@@ -15,5 +15,5 @@ public abstract class Message implements Serializable {
         return content;
     }
 
-    public abstract void process(Controller controller);
+    public abstract void process(RoomState state);
 }

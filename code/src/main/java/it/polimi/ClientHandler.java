@@ -1,6 +1,9 @@
-package it.polimi.Controller;
+package it.polimi;
 
 import it.polimi.Message.Message;
+import it.polimi.States.HomeState;
+import it.polimi.States.RoomState;
+import it.polimi.States.RoomStateManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,13 +16,13 @@ public class ClientHandler implements Runnable{
     private ObjectInputStream input;
     private final String ip;
     private final int port;
-    private Controller controller;
+    private RoomStateManager state;
 
     public ClientHandler(Socket clientSocket, String ip, int port) {
         this.clientSocket = clientSocket;
         this.ip = ip;
         this.port = port;
-        this.controller = new Controller();
+        this.state= RoomStateManager.getInstance();
         try {
             this.output = new ObjectOutputStream(clientSocket.getOutputStream());
             this.input = new ObjectInputStream(clientSocket.getInputStream());
@@ -55,7 +58,7 @@ public class ClientHandler implements Runnable{
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 Message message = (Message) input.readObject();
-                message.process(controller);
+                message.process(state.getCurrentState());
             }
         } catch (ClassCastException | ClassNotFoundException | IOException e) {
             disconnect();
