@@ -1,5 +1,6 @@
 package it.polimi;
 
+import it.polimi.CommandExecutors.CommandExecutorFactory;
 import it.polimi.Controller.ClientHandler;
 
 import java.io.IOException;
@@ -16,6 +17,14 @@ public class Main {
 
         System.out.print("Insert a valid port: ");
         int port = scanner.nextInt();
+
+        // Start the server thread
+        new Thread(() -> startListening(ip, port)).start();
+
+        readLine();
+    }
+
+    public static void startListening(String ip, int port) {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -23,7 +32,7 @@ public class Main {
 
                     client.setSoTimeout(10000);
 
-                    ClientHandler clientHandler = new ClientHandler(client);
+                    ClientHandler clientHandler = new ClientHandler(client, ip, port);
                     Thread thread = new Thread(clientHandler, "ss_handler" + client.getInetAddress());
                     thread.start();
                 } catch (Exception e) {
@@ -32,5 +41,25 @@ public class Main {
             }
         } catch (IOException e) {
             System.out.println(e);
-        }}
+        }
+    }
+
+    public static void readLine() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter commands (type 'exit' to quit):");
+
+        while (true) {
+            String command = scanner.nextLine();
+
+            if ("exit".equals(command)) {
+                System.out.println("Exiting...");
+                break;
+            } else {
+                CommandExecutorFactory.getCommand(command).execute();
+            }
+        }
+
+        scanner.close();
+    }
 }

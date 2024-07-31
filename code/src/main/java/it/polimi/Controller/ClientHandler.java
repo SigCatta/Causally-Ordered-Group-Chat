@@ -11,9 +11,15 @@ public class ClientHandler implements Runnable{
     private final Socket clientSocket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
+    private final String ip;
+    private final int port;
+    private Controller controller;
 
-    public ClientHandler(Socket clientSocket) {
+    public ClientHandler(Socket clientSocket, String ip, int port) {
         this.clientSocket = clientSocket;
+        this.ip = ip;
+        this.port = port;
+        this.controller = new Controller();
         try {
             this.output = new ObjectOutputStream(clientSocket.getOutputStream());
             this.input = new ObjectInputStream(clientSocket.getInputStream());
@@ -24,30 +30,34 @@ public class ClientHandler implements Runnable{
     @Override
     public void run() {
         try {
-            System.out.println("Inizio a gestire messaggio");
+            System.out.println("Starting handling message");
             handleClientConnection();
         } catch (Exception e) {
-            System.out.println(e);
             disconnect();
         }
     }
 
     private void disconnect() {
         try {
-            if (!clientSocket.isClosed()) {
-                    clientSocket.close();
-                }
-            } catch (IOException e){}
+            if (input != null) {
+                input.close();
+            }
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
+        } catch (IOException e) {
+            System.out.println("Failed to close client connection: " + e.getMessage());
+        }
+        Thread.currentThread().interrupt();
     }
 
     private void handleClientConnection() {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 Message message = (Message) input.readObject();
-                message.process();
+                message.process(controller);
             }
         } catch (ClassCastException | ClassNotFoundException | IOException e) {
-            System.out.println(e);
             disconnect();
         }
     }
