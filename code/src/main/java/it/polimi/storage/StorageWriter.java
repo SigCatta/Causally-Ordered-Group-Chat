@@ -4,14 +4,13 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Random;
 
-public class StorageWriter {
+class StorageWriter {
     // Initialize the PATH variable, this is the directory where all files will be stored
     private final String PATH = System.getProperty("user.home") + "/chat_ss";
 
     // Appends data to a given file
-    public void append(String string, String location) {
+    public void append(String location, String string) {
         if (fileExists(location)) {
             try (FileWriter writer = new FileWriter(PATH + "/" + location, true)) {
                 writer.write(string);
