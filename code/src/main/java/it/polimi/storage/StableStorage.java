@@ -87,4 +87,7 @@ public class StableStorage {
                 .collect(Collectors.joining("\n"));
     }
 
+    public void delete(String roomId) {
+        sw.deleteDirectory(Paths.get(roomId));
+    }
 }

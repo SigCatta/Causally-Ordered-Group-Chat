@@ -5,15 +5,14 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.Iterator;
 
 class StorageWriter {
-    // Initialize the PATH variable, this is the directory where all files will be stored
     private final Path PATH = Paths.get(System.getProperty("user.home"), "chat_ss");
 
-    // Appends data to a given file
     public void append(Path relative, String string) {
-        Path location = PATH.resolve(relative);
+        Path location = sanitizePath(relative);
         if (Files.exists(location)) {
             try (FileWriter writer = new FileWriter(location.toString(), true)) {
                 writer.write(string);
@@ -24,7 +23,7 @@ class StorageWriter {
     }
 
     public void overwrite(Path relative, String string) {
-        Path location = PATH.resolve(relative);
+        Path location = sanitizePath(relative);
         if (Files.exists(location)) {
             try (FileWriter writer = new FileWriter(location.toString())) {
                 writer.write(string);
@@ -34,14 +33,10 @@ class StorageWriter {
         }
     }
 
-    // Creates a file and all the necessary directories to complete the path
     public void createFile(Path relative) {
-        Path location = PATH.resolve(relative);
+        Path location = sanitizePath(relative);
         if (Files.notExists(location)) {
-            // If the location contains a non-existing directory, create it
             createMissingDirectories(relative);
-
-            // Finally create the file
             try {
                 Files.createFile(location);
             } catch (IOException e) {
@@ -50,7 +45,6 @@ class StorageWriter {
         }
     }
 
-    // Creates missing directories to complete a given path
     private void createMissingDirectories(Path relative) {
         Iterator<Path> directories = relative.iterator();
         Path dir = PATH;
@@ -69,21 +63,34 @@ class StorageWriter {
         }
     }
 
-    // Deletes a file
-    public void deleteFile(Path relative) {
-        Path location = PATH.resolve(relative);
+    public boolean directoryExists(Path location) {
+        return Files.exists(location) && Files.isDirectory(location);
+    }
+
+    // delets a chat's directory
+    public void deleteDirectory(Path relative) {
+        Path location = sanitizePath(relative);
         try {
-            Files.deleteIfExists(PATH.resolve(location));
+            Files.walk(location)
+                    .sorted(Comparator.reverseOrder()) // have to first delete the files, then the subdirectories ...
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-
-    // Checks if a directory exists or not
-    public boolean directoryExists(Path location) {
-        return Files.exists(location)
-                && Files.isDirectory(location);
+    // Assures the path is within the chat_ss directory
+    private Path sanitizePath(Path relative) {
+        Path location = PATH.resolve(relative).normalize();
+        if (!location.startsWith(PATH)) {
+            throw new IllegalArgumentException("Invalid path: " + relative);
+        }
+        return location;
     }
-
 }
