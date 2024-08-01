@@ -1,5 +1,9 @@
-package it.polimi.storage;
+package it.polimi.Storage;
 
+import it.polimi.Entities.Participant;
+import it.polimi.Entities.VectorClock;
+
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,28 +19,42 @@ public class StableStorage {
     }
 
     // Creates and initializes all the files needed for a chat room
-    public void initNewRoom(String roomId, int size) {
+    public void initNewRoom(String roomId, List<Participant> participants) {
+        Path roomDir = Paths.get(roomId);
+        int size = participants.size();
         if (size < 2) {
             System.out.println("Go get some friends...");
             throw new IllegalArgumentException("Room size must be at least 2");
         }
+
+        //
         // Create necessary files
-        sw.createFile(Paths.get(roomId, "messages.txt"));
-        sw.createFile(Paths.get(roomId, "vector_clocks.txt"));
-        sw.createFile(Paths.get(roomId, "last_vc.txt"));
+        //
+        sw.createFile(roomDir.resolve("messages.txt"));
+        sw.createFile(roomDir.resolve("vector_clocks.txt"));
+        sw.createFile(roomDir.resolve("last_vc.txt"));
+        sw.createFile(roomDir.resolve("usernames.txt"));
+        sw.createFile(roomDir.resolve("addresses.txt"));
 
-        sw.createFile(Paths.get(roomId, "delayed", "messages.txt"));
-        sw.createFile(Paths.get(roomId, "delayed", "vector_clocks.txt"));
+        sw.createFile(roomDir.resolve(Paths.get("delayed", "messages.txt")));
+        sw.createFile(roomDir.resolve(Paths.get("delayed", "vector_clocks.txt")));
 
+        //
         // Initialize files
-        sw.append(Paths.get(roomId, "messages.txt"), "Chat room created successfully\n");
+        //
+        participants.forEach(p -> {
+            sw.append(roomDir.resolve("usernames.txt"), p.name() + '\n');
+            sw.append(roomDir.resolve("addresses.txt"), p.ipAddress() + '\n');
+        });
+
+        sw.append(roomDir.resolve("messages.txt"), "Chat room created successfully\n");
 
         StringBuilder sb = new StringBuilder() // Build the first vector clock: (0,0,...,0,0)
                 .append("[")
                 .repeat("0, ", size - 1)
                 .append("0]\n");
-        sw.append(Paths.get(roomId, "vector_clocks.txt"), sb.toString());
-        sw.append(Paths.get(roomId, "last_vc.txt"), sb.toString());
+        sw.append(roomDir.resolve("vector_clocks.txt"), sb.toString());
+        sw.append(roomDir.resolve("last_vc.txt"), sb.toString());
     }
 
     // Returns the current vector clock
@@ -59,6 +77,7 @@ public class StableStorage {
         sw.append(Paths.get(roomId, "delayed", "messages.txt"), message.replace("\n", " ") + '\n');
     }
 
+    // If a delayed message can be delivered, it gets delivered
     public void deliverDelayedMessages(String roomId) {
         List<String> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
         List<VectorClock> vectorClocks = new ArrayList<>(sr.getDelayedVectorClocks(roomId));
@@ -81,12 +100,14 @@ public class StableStorage {
         sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), listToText(messages));
     }
 
+    // Converts a List of data to a string, elements are separated by \n
     private String listToText(List<?> list) {
         return list.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining("\n"));
     }
 
+    // Absolutely nukes a path
     public void delete(String roomId) {
         sw.deleteDirectory(Paths.get(roomId));
     }

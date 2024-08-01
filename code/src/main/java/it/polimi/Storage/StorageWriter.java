@@ -1,4 +1,4 @@
-package it.polimi.storage;
+package it.polimi.Storage;
 
 import java.io.FileWriter;
 import java.io.IOException;

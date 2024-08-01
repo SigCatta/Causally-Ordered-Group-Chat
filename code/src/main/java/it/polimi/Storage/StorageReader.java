@@ -1,4 +1,6 @@
-package it.polimi.storage;
+package it.polimi.Storage;
+
+import it.polimi.Entities.VectorClock;
 
 import java.io.IOException;
 import java.nio.file.Files;
