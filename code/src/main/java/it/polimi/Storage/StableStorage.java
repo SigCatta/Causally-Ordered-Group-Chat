@@ -72,12 +72,35 @@ public class StableStorage {
     }
 
     // DELAYED - saves a message to stable storage, along with the vector clock
+    // messages are stored in order based on their vector clocks
     public void delayMessage(String roomId, String message, VectorClock newVC) {
-        sw.append(Paths.get(roomId, "delayed", "vector_clocks.txt"), newVC.toString() + '\n');
-        sw.append(Paths.get(roomId, "delayed", "messages.txt"), message.replace("\n", " ") + '\n');
+        List<VectorClock> vectorClocks = sr.getDelayedVectorClocks(roomId);
+        List<String> messages = sr.getDelayedMessages(roomId);
+        StringBuilder vcSB = new StringBuilder();
+        StringBuilder msgSB = new StringBuilder();
+
+        // If there are no other delayed messages, just append the new message
+        if(vectorClocks.isEmpty()) {
+            vcSB.append(newVC).append('\n');
+            msgSB.append(message.replace("\n", " ")).append('\n');
+            return;
+        }
+
+        for (int i = 0; i < vectorClocks.size(); i++) {
+            if (newVC.canBeDelivered(vectorClocks.get(i))) {
+                vcSB.append(newVC).append('\n');
+                msgSB.append(message.replace("\n", " ")).append('\n');
+                break;
+            }
+            vcSB.append(vectorClocks.get(i)).append('\n');
+            msgSB.append(messages.get(i).replace("\n", " ")).append('\n');
+        }
+
+        sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), vcSB.toString());
+        sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), msgSB.toString());
     }
 
-    // If a delayed message can be delivered, it gets delivered
+    // Deliver all deliverable delayed messages
     public void deliverDelayedMessages(String roomId) {
         List<String> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
         List<VectorClock> vectorClocks = new ArrayList<>(sr.getDelayedVectorClocks(roomId));
@@ -93,7 +116,10 @@ public class StableStorage {
                 // Remove delivered data from delayed lists
                 vectorClocks.removeFirst();
                 messages.removeFirst();
-            } else break;
+            } else {
+                if (i == 0) return;
+                break;
+            }
         }
 
         sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), listToText(vectorClocks));
