@@ -5,7 +5,7 @@ import it.polimi.CommandExecutors.Specific.*;
 public class CommandExecutorFactory {
     public static CommandExecutor getCommand(String command) {
         switch (command) {
-            case "sendMessage":
+            case "send-message":
                 return new SendMessageCE();
             case "create-room":
                 return new NewRoomCE();
@@ -15,6 +15,8 @@ public class CommandExecutorFactory {
                 return new DeleteRoomCE();
             case "list-rooms":
                 return new ListRoomsCE();
+            case "exit-room":
+                return new ExitRoomCE();
         }
         return new InvalidCE();
     }

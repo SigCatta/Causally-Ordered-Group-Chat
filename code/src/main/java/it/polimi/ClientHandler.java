@@ -1,8 +1,6 @@
 package it.polimi;
 
 import it.polimi.Message.Message;
-import it.polimi.States.HomeState;
-import it.polimi.States.RoomState;
 import it.polimi.States.RoomStateManager;
 
 import java.io.IOException;
@@ -10,8 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class ClientHandler implements Runnable{
-    private final Socket clientSocket;
+public class ClientHandler implements Runnable {
+    private volatile Socket clientSocket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
     private final String ip;
@@ -22,11 +20,17 @@ public class ClientHandler implements Runnable{
         this.clientSocket = clientSocket;
         this.ip = ip;
         this.port = port;
-        this.state= RoomStateManager.getInstance();
+        this.state = RoomStateManager.getInstance();
+        this.state.setConnected(true);
+        setupStreams();
+    }
+
+    private void setupStreams() {
         try {
             this.output = new ObjectOutputStream(clientSocket.getOutputStream());
             this.input = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
+            System.out.println("Error setting up streams: " + e.getMessage());
         }
     }
 
@@ -36,7 +40,28 @@ public class ClientHandler implements Runnable{
             System.out.println("Starting handling message");
             handleClientConnection();
         } catch (Exception e) {
-            disconnect();
+            System.out.println("Connection lost. Attempting to reconnect...");
+            new Thread(this::reconnectInBackground).start(); // Start reconnection in a new thread
+        }
+    }
+
+    private void reconnectInBackground() {
+        while (true) {
+            try {
+                clientSocket = new Socket(ip, port);
+                setupStreams();
+                System.out.println("Reconnected to server");
+                state.setConnected(true);
+                run(); // Restart handling messages once reconnected
+                break;
+            } catch (IOException e) {
+                System.out.println("Reconnection failed. Retrying in 5 seconds...");
+                try {
+                    Thread.sleep(5000); // Wait before retrying
+                } catch (InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt(); // Restore interrupt status
+                }
+            }
         }
     }
 
@@ -48,20 +73,22 @@ public class ClientHandler implements Runnable{
             if (clientSocket != null) {
                 clientSocket.close();
             }
+            RoomStateManager.getInstance().setConnected(false);
         } catch (IOException e) {
             System.out.println("Failed to close client connection: " + e.getMessage());
         }
-        Thread.currentThread().interrupt();
     }
 
-    private void handleClientConnection() {
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
+    private void handleClientConnection() throws IOException, ClassNotFoundException {
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
                 Message message = (Message) input.readObject();
                 message.process(state.getCurrentState());
+            } catch (ClassCastException | ClassNotFoundException | IOException e) {
+                System.out.println("Error in handling client connection: " + e.getMessage());
+                disconnect();
+                throw e; // Rethrow to trigger reconnection
             }
-        } catch (ClassCastException | ClassNotFoundException | IOException e) {
-            disconnect();
         }
     }
 }
