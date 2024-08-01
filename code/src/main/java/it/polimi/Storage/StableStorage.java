@@ -78,22 +78,28 @@ public class StableStorage {
         List<String> messages = sr.getDelayedMessages(roomId);
         StringBuilder vcSB = new StringBuilder();
         StringBuilder msgSB = new StringBuilder();
+        boolean ok = false;
 
-        // If there are no other delayed messages, just append the new message
-        if(vectorClocks.isEmpty()) {
+        // If there are no other delayed messages OR the new vc is older than all other saved, just insert the new message in front
+        if (vectorClocks.isEmpty() || newVC.isOlder(vectorClocks.getFirst())) {
             vcSB.append(newVC).append('\n');
             msgSB.append(message.replace("\n", " ")).append('\n');
-            return;
+            ok = true;
         }
 
         for (int i = 0; i < vectorClocks.size(); i++) {
-            if (newVC.canBeDelivered(vectorClocks.get(i))) {
-                vcSB.append(newVC).append('\n');
-                msgSB.append(message.replace("\n", " ")).append('\n');
-                break;
-            }
             vcSB.append(vectorClocks.get(i)).append('\n');
             msgSB.append(messages.get(i).replace("\n", " ")).append('\n');
+            if (newVC.canBeDeliveredAfter(vectorClocks.get(i)) && !ok) {
+                vcSB.append(newVC).append('\n');
+                msgSB.append(message.replace("\n", " ")).append('\n');
+                ok = true;
+            }
+        }
+
+        if(!ok){
+            vcSB.append(newVC).append('\n');
+            msgSB.append(message.replace("\n", " ")).append('\n');
         }
 
         sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), vcSB.toString());
@@ -106,10 +112,10 @@ public class StableStorage {
         List<VectorClock> vectorClocks = new ArrayList<>(sr.getDelayedVectorClocks(roomId));
 
         VectorClock vc = getCurrentVectorClock(roomId);
-
-        for (int i = 0; i < vectorClocks.size(); i++) {
+        int size = vectorClocks.size();
+        for (int i = 0; i < size; i++) {
             VectorClock newVC = vectorClocks.getFirst();
-            if (newVC.canBeDelivered(vc)) {
+            if (newVC.canBeDeliveredAfter(vc)) {
                 vc = newVC;
                 deliverMessage(roomId, messages.getFirst(), newVC);
 

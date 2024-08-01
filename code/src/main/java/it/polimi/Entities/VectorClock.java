@@ -7,7 +7,7 @@ import java.util.List;
 public record VectorClock(List<Integer> vector) {
 
     // True if this vector clock can be delivered after the one passed as argument
-    public boolean canBeDelivered(VectorClock after) {
+    public boolean canBeDeliveredAfter(VectorClock after) {
         List<Integer> other = after.vector();
         if (vector.size() != other.size()) {
             throw new RuntimeException();
@@ -24,6 +24,14 @@ public record VectorClock(List<Integer> vector) {
             }
         }
         return count <= 1;
+    }
+
+    public boolean isOlder(VectorClock other) {
+        List<Integer> otherVector = other.vector();
+        for (int i = 0; i < otherVector.size(); i++) {
+            if(vector.get(i) > otherVector.get(i)) return false;
+        }
+        return true;
     }
 
     // Increments the value at the given index by one

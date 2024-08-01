@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class VectorClockTest {
     @Test
-    void testCanBeDelivered() {
+    void testCanBeDeliveredAfter() {
         VectorClock vc1 = new VectorClock(List.of(0, 0, 0));
         VectorClock vc2 = new VectorClock(List.of(1, 0, 0));
         VectorClock vc3 = new VectorClock(List.of(1, 1, 0));
@@ -20,28 +20,28 @@ class VectorClockTest {
         VectorClock vce = new VectorClock(List.of(0, 0, 0, 0));
 
         // vc1 is the most recent delivery
-        assertTrue(vc2.canBeDelivered(vc1));
-        assertFalse(vc3.canBeDelivered(vc1));
-        assertFalse(vc4.canBeDelivered(vc1));
-        assertFalse(vcf.canBeDelivered(vc1));
-        assertThrows(Exception.class, () -> vce.canBeDelivered(vc1));
+        assertTrue(vc2.canBeDeliveredAfter(vc1));
+        assertFalse(vc3.canBeDeliveredAfter(vc1));
+        assertFalse(vc4.canBeDeliveredAfter(vc1));
+        assertFalse(vcf.canBeDeliveredAfter(vc1));
+        assertThrows(Exception.class, () -> vce.canBeDeliveredAfter(vc1));
 
 
         // vc2 is the most recent delivery
-        assertTrue(vc3.canBeDelivered(vc2));
-        assertTrue(vc4.canBeDelivered(vc2));
-        assertFalse(vcf.canBeDelivered(vc2));
-        assertThrows(Exception.class, () -> vce.canBeDelivered(vc2));
+        assertTrue(vc3.canBeDeliveredAfter(vc2));
+        assertTrue(vc4.canBeDeliveredAfter(vc2));
+        assertFalse(vcf.canBeDeliveredAfter(vc2));
+        assertThrows(Exception.class, () -> vce.canBeDeliveredAfter(vc2));
 
         // vc3 is the most recent delivery
-        assertTrue(vc4.canBeDelivered(vc3));
-        assertFalse(vcf.canBeDelivered(vc3));
-        assertThrows(Exception.class, () -> vce.canBeDelivered(vc3));
+        assertTrue(vc4.canBeDeliveredAfter(vc3));
+        assertFalse(vcf.canBeDeliveredAfter(vc3));
+        assertThrows(Exception.class, () -> vce.canBeDeliveredAfter(vc3));
 
         // vc4 is the most recent delivery
-        assertTrue(vc3.canBeDelivered(vc4));
-        assertFalse(vcf.canBeDelivered(vc4));
-        assertThrows(Exception.class, () -> vce.canBeDelivered(vc4));
+        assertTrue(vc3.canBeDeliveredAfter(vc4));
+        assertFalse(vcf.canBeDeliveredAfter(vc4));
+        assertThrows(Exception.class, () -> vce.canBeDeliveredAfter(vc4));
 
         System.out.println(vc3);
     }
