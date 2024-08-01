@@ -1,5 +1,7 @@
 package it.polimi.storage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public record VectorClock(List<Integer> vector) {
@@ -38,11 +40,24 @@ public record VectorClock(List<Integer> vector) {
             throw new RuntimeException();
         }
 
-        List<Integer> newVector = List.copyOf(vector);
+        List<Integer> newVector = new ArrayList<>();
         for (int i = 0; i < vector.size(); i++) {
-            newVector.set(i, Math.max(vector.get(i), otherVector.get(i)));
+            int el = Math.max(vector.get(i), otherVector.get(i));
+            newVector.add(el);
         }
         return new VectorClock(newVector);
+    }
+
+    // Converts a string representing a list into the corresponding Vector Clock element
+    public static VectorClock parseVectorClock(String vector) {
+        return new VectorClock(
+                Arrays.stream(vector.substring(1, vector.length() - 1) // Remove brackets
+                                .replace(" ", "")
+                                .split(",")
+                        )
+                        .map(Integer::valueOf)
+                        .toList()
+        );
     }
 
     @Override

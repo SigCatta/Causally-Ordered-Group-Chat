@@ -1,5 +1,9 @@
 package it.polimi.storage;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class StableStorage {
     private final StorageWriter sw;
     private final StorageReader sr;
@@ -20,17 +24,19 @@ public class StableStorage {
         sw.createFile(roomId + "/vector_clocks.txt");
         sw.createFile(roomId + "/last_vc.txt");
 
+        sw.createFile(roomId + "/delayed/messages.txt");
+        sw.createFile(roomId + "/delayed/vector_clocks.txt");
+
         // Initialize files
-        sw.append(roomId + "/messages.txt", "Chat room created successfully");
+        sw.append(roomId + "/messages.txt", "Chat room created successfully\n");
 
         StringBuilder sb = new StringBuilder() // Build the first vector clock: (0,0,...,0,0)
-                .append("[");
-        // .repeat("0,", size - 1)
-        // .append("0,".repeat(size - 1));
-        for (int i = 0; i < size - 1; i++) {
-            sb.append("0,");
-        }
-        sb.append("0]\n");
+                .append("[")
+                .repeat("0, ", size - 1)
+                .append("0]\n");
+        //        for (int i = 0; i < size - 1; i++) {
+        //            sb.append("0,");
+        //        }
         sw.append(roomId + "/vector_clocks.txt", sb.toString());
         sw.append(roomId + "/last_vc.txt", sb.toString());
     }
@@ -40,10 +46,47 @@ public class StableStorage {
         return sr.getCurrentVectorClock(roomId);
     }
 
-    // Saves a message to stable storage, along with the vector clock
-    public void persistMessage(String roomId, String message, VectorClock vc) {
+    // DELIVERED - Saves a message to stable storage, along with the vector clock
+    public void deliverMessage(String roomId, String message, VectorClock newVC) {
+        VectorClock currentVC = getCurrentVectorClock(roomId);
 
-        sw.append(roomId + "/messages.txt", message.replace("\n", " "));
+        sw.append(roomId + "/vector_clocks.txt", newVC.toString() + '\n');
+        sw.append(roomId + "/messages.txt", message.replace("\n", " ") + '\n');
+        sw.overwrite(roomId + "/last_vc.txt", currentVC.merge(newVC).toString());
+    }
+
+    // DELAYED - saves a message to stable storage, along with the vector clock
+    public void delayMessage(String roomId, String message, VectorClock newVC) {
+        sw.append(roomId + "/delayed/vector_clocks.txt", newVC.toString() + '\n');
+        sw.append(roomId + "/delayed/messages.txt", message.replace("\n", " ") + '\n');
+    }
+
+    public void deliverDelayedMessages(String roomId) {
+        List<String> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
+        List<VectorClock> vectorClocks = new ArrayList<>(sr.getDelayedVectorClocks(roomId));
+
+        VectorClock vc = getCurrentVectorClock(roomId);
+
+        for (int i = 0; i < vectorClocks.size(); i++) {
+            VectorClock newVC = vectorClocks.getFirst();
+            if (newVC.canBeDelivered(vc)) {
+                vc = newVC;
+                deliverMessage(roomId, messages.getFirst(), newVC);
+
+                // Remove delivered data from delayed lists
+                vectorClocks.removeFirst();
+                messages.removeFirst();
+            } else break;
+        }
+
+        sw.overwrite(roomId + "/delayed/vector_clocks.txt", listToText(vectorClocks));
+        sw.overwrite(roomId + "/delayed/messages.txt", listToText(messages));
+    }
+
+    private String listToText(List<?> list) {
+        return list.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining("\n"));
     }
 
 }

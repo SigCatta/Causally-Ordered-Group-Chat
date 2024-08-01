@@ -17,14 +17,8 @@ class StorageReader {
         Path location = Paths.get(PATH, roomId, "last_vc.txt");
         String vc = catFile(location).getFirst();
 
-        // Convert the string to a list of integers
-        List<Integer> vector =
-                Arrays.stream(vc.substring(1, vc.length() - 1) // Remove brackets
-                                .replace(" ", "")
-                                .split(","))
-                        .map(Integer::valueOf)
-                        .toList();
-        return new VectorClock(vector);
+        // Parse the String to the corresponding vector clock
+        return VectorClock.parseVectorClock(vc);
     }
 
     // Reads all lines from a file
@@ -36,4 +30,18 @@ class StorageReader {
             throw new RuntimeException();
         }
     }
+
+    public List<VectorClock> getDelayedVectorClocks(String roomId) {
+        Path location = Paths.get(PATH, roomId, "delayed", "vector_clocks.txt");
+        return catFile(location).stream()
+                .map(VectorClock::parseVectorClock)
+                .toList();
+    }
+
+    public List<String> getDelayedMessages(String roomId){
+        Path location = Paths.get(PATH, roomId, "delayed", "messages.txt");
+        return catFile(location);
+    }
+
+
 }

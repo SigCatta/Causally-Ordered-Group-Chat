@@ -20,6 +20,16 @@ class StorageWriter {
         }
     }
 
+    public void overwrite(String location, String string) {
+        if (fileExists(location)) {
+            try (FileWriter writer = new FileWriter(adaptForWindows(PATH + "/" + location))) {
+                writer.write(string);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     // Creates a file and all the necessary directories to complete the path
     public boolean createFile(String location) {
         if (!fileExists(location)) {

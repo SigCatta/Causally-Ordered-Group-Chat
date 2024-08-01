@@ -44,4 +44,12 @@ class VectorClockTest {
 
         System.out.println(vc3);
     }
+
+    @Test
+    void testMerge(){
+        VectorClock vc1 = new VectorClock(List.of(0, 0, 0));
+        VectorClock vc2 = new VectorClock(List.of(1, 0, 0));
+
+        assertEquals(new VectorClock(List.of(1, 0, 0)), vc1.merge(vc2));
+    }
 }
