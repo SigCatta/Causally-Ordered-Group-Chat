@@ -1,7 +1,5 @@
-package it.polimi.storage.it.polimi;
+package it.polimi.storage;
 
-import it.polimi.storage.StableStorage;
-import it.polimi.storage.VectorClock;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -18,5 +16,6 @@ public class StableStorageTest {
         ss.deliverMessage("test", "Message 2", new VectorClock(List.of(1, 1, 0)));
 
         ss.deliverDelayedMessages("test");
+
     }
 }

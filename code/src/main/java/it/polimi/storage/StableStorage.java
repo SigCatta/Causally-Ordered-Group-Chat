@@ -1,5 +1,6 @@
 package it.polimi.storage;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,25 +21,22 @@ public class StableStorage {
             throw new IllegalArgumentException("Room size must be at least 2");
         }
         // Create necessary files
-        sw.createFile(roomId + "/messages.txt");
-        sw.createFile(roomId + "/vector_clocks.txt");
-        sw.createFile(roomId + "/last_vc.txt");
+        sw.createFile(Paths.get(roomId, "messages.txt"));
+        sw.createFile(Paths.get(roomId, "vector_clocks.txt"));
+        sw.createFile(Paths.get(roomId, "last_vc.txt"));
 
-        sw.createFile(roomId + "/delayed/messages.txt");
-        sw.createFile(roomId + "/delayed/vector_clocks.txt");
+        sw.createFile(Paths.get(roomId, "delayed", "messages.txt"));
+        sw.createFile(Paths.get(roomId, "delayed", "vector_clocks.txt"));
 
         // Initialize files
-        sw.append(roomId + "/messages.txt", "Chat room created successfully\n");
+        sw.append(Paths.get(roomId, "messages.txt"), "Chat room created successfully\n");
 
         StringBuilder sb = new StringBuilder() // Build the first vector clock: (0,0,...,0,0)
                 .append("[")
                 .repeat("0, ", size - 1)
                 .append("0]\n");
-        //        for (int i = 0; i < size - 1; i++) {
-        //            sb.append("0,");
-        //        }
-        sw.append(roomId + "/vector_clocks.txt", sb.toString());
-        sw.append(roomId + "/last_vc.txt", sb.toString());
+        sw.append(Paths.get(roomId, "vector_clocks.txt"), sb.toString());
+        sw.append(Paths.get(roomId, "last_vc.txt"), sb.toString());
     }
 
     // Returns the current vector clock
@@ -50,15 +48,15 @@ public class StableStorage {
     public void deliverMessage(String roomId, String message, VectorClock newVC) {
         VectorClock currentVC = getCurrentVectorClock(roomId);
 
-        sw.append(roomId + "/vector_clocks.txt", newVC.toString() + '\n');
-        sw.append(roomId + "/messages.txt", message.replace("\n", " ") + '\n');
-        sw.overwrite(roomId + "/last_vc.txt", currentVC.merge(newVC).toString());
+        sw.append(Paths.get(roomId, "vector_clocks.txt"), newVC.toString() + '\n');
+        sw.append(Paths.get(roomId, "messages.txt"), message.replace("\n", " ") + '\n');
+        sw.overwrite(Paths.get(roomId, "last_vc.txt"), currentVC.merge(newVC).toString());
     }
 
     // DELAYED - saves a message to stable storage, along with the vector clock
     public void delayMessage(String roomId, String message, VectorClock newVC) {
-        sw.append(roomId + "/delayed/vector_clocks.txt", newVC.toString() + '\n');
-        sw.append(roomId + "/delayed/messages.txt", message.replace("\n", " ") + '\n');
+        sw.append(Paths.get(roomId, "delayed", "vector_clocks.txt"), newVC.toString() + '\n');
+        sw.append(Paths.get(roomId, "delayed", "messages.txt"), message.replace("\n", " ") + '\n');
     }
 
     public void deliverDelayedMessages(String roomId) {
@@ -79,8 +77,8 @@ public class StableStorage {
             } else break;
         }
 
-        sw.overwrite(roomId + "/delayed/vector_clocks.txt", listToText(vectorClocks));
-        sw.overwrite(roomId + "/delayed/messages.txt", listToText(messages));
+        sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), listToText(vectorClocks));
+        sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), listToText(messages));
     }
 
     private String listToText(List<?> list) {
