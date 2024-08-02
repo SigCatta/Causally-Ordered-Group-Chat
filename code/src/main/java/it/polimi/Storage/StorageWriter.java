@@ -7,10 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 class StorageWriter {
     private final Path PATH = Paths.get(System.getProperty("user.home"), "chat_ss");
 
+    // Appends a String to a file
     public void append(Path relative, String string) {
         Path location = sanitizePath(relative);
         if (Files.exists(location)) {
@@ -22,6 +24,7 @@ class StorageWriter {
         }
     }
 
+    // Overwrites a file, effectively deleting all contents
     public void overwrite(Path relative, String string) {
         Path location = sanitizePath(relative);
         if (Files.exists(location)) {
@@ -33,6 +36,7 @@ class StorageWriter {
         }
     }
 
+    // Creates a file at a give position
     public void createFile(Path relative) {
         Path location = sanitizePath(relative);
         if (Files.notExists(location)) {
@@ -45,6 +49,7 @@ class StorageWriter {
         }
     }
 
+    // Creates all the missing directories in a path
     private void createMissingDirectories(Path relative) {
         Iterator<Path> directories = relative.iterator();
         Path dir = PATH;
@@ -67,12 +72,11 @@ class StorageWriter {
         return Files.exists(location) && Files.isDirectory(location);
     }
 
-    // delets a chat's directory
+    // Deletes a chat's directory
     public void deleteDirectory(Path relative) {
         Path location = sanitizePath(relative);
-        try {
-            Files.walk(location)
-                    .sorted(Comparator.reverseOrder()) // have to first delete the files, then the subdirectories ...
+        try (Stream<Path> paths = Files.walk(location)) {
+            paths.sorted(Comparator.reverseOrder())
                     .forEach(path -> {
                         try {
                             Files.delete(path);

@@ -9,9 +9,9 @@ import java.util.List;
 public class StableStorageTest {
     @Test
     void threeDelayedAllDelivered() {
-        Participant p1 = new Participant("1", "1.1.1.1");
-        Participant p2 = new Participant("2", "2.2.2.2");
-        Participant p3 = new Participant("3", "3.3.3.3");
+        Participant p1 = new Participant(0, "1", "1.1.1.1");
+        Participant p2 = new Participant(1, "2", "2.2.2.2");
+        Participant p3 = new Participant(2, "3", "3.3.3.3");
 
         StableStorage ss = new StableStorage();
         ss.initNewRoom("test", List.of(p1, p2, p3));
@@ -32,9 +32,9 @@ public class StableStorageTest {
 
     @Test
     void fourDelayedThreeDelivered() {
-        Participant p1 = new Participant("1", "1.1.1.1");
-        Participant p2 = new Participant("2", "2.2.2.2");
-        Participant p3 = new Participant("3", "3.3.3.3");
+        Participant p1 = new Participant(0, "1", "1.1.1.1");
+        Participant p2 = new Participant(1, "2", "2.2.2.2");
+        Participant p3 = new Participant(2, "3", "3.3.3.3");
 
         StableStorage ss = new StableStorage();
         ss.initNewRoom("test", List.of(p1, p2, p3));

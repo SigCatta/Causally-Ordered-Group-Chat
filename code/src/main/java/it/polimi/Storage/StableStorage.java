@@ -57,6 +57,28 @@ public class StableStorage {
         sw.append(roomDir.resolve("last_vc.txt"), sb.toString());
     }
 
+    // Returns a list of all participants in a chat room
+    public List<Participant> getParticipants(String roomId) {
+        return sr.getParticipants(roomId);
+    }
+
+    // Updates a participant's ip address
+    public void updateParticipantIp(String roomId, Participant participant) {
+        StringBuilder sb = new StringBuilder();
+
+        // update the participant's ip address, while leaving the other ones untouched
+        sr.getParticipants(roomId)
+                .forEach(p -> {
+                    if (p.index() == participant.index()) {
+                        sb.append(participant.ipAddress()).append('\n');
+                    } else {
+                        sb.append(p.ipAddress()).append('\n');
+                    }
+                });
+
+        sw.overwrite(Paths.get(roomId, "addresses.txt"), sb.toString());
+    }
+
     // Returns the current vector clock
     public VectorClock getCurrentVectorClock(String roomId) {
         return sr.getCurrentVectorClock(roomId);
@@ -97,7 +119,7 @@ public class StableStorage {
             }
         }
 
-        if(!ok){
+        if (!ok) {
             vcSB.append(newVC).append('\n');
             msgSB.append(message.replace("\n", " ")).append('\n');
         }
@@ -132,15 +154,15 @@ public class StableStorage {
         sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), listToText(messages));
     }
 
+    // Absolutely nukes a path
+    public void delete(String roomId) {
+        sw.deleteDirectory(Paths.get(roomId));
+    }
+
     // Converts a List of data to a string, elements are separated by \n
     private String listToText(List<?> list) {
         return list.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining("\n"));
-    }
-
-    // Absolutely nukes a path
-    public void delete(String roomId) {
-        sw.deleteDirectory(Paths.get(roomId));
     }
 }
