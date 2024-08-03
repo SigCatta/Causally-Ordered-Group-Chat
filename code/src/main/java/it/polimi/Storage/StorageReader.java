@@ -1,5 +1,6 @@
 package it.polimi.Storage;
 
+import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 
@@ -10,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 class StorageReader {
     // Initialize the PATH variable, this is the directory where all files will be stored
@@ -35,18 +37,18 @@ class StorageReader {
         return VectorClock.parseVectorClock(vc);
     }
 
-    // Returns a list of all delayed vector clocks for a given chat room
-    public List<VectorClock> getDelayedVectorClocks(String roomId) {
-        Path location = Paths.get(PATH, roomId, "delayed", "vector_clocks.txt");
-        return catFile(location).stream()
-                .map(VectorClock::parseVectorClock)
-                .toList();
-    }
 
     // Returns a list of all delayed messages for a given chat room
-    public List<String> getDelayedMessages(String roomId) {
-        Path location = Paths.get(PATH, roomId, "delayed", "messages.txt");
-        return catFile(location);
+    public List<Message> getDelayedMessages(String roomId) {
+        Path msgLocation = Paths.get(PATH, roomId, "delayed", "messages.txt");
+        Path vcLocation = Paths.get(PATH, roomId, "delayed", "vector_clocks.txt");
+
+        List<String> messages = catFile(msgLocation);
+        List<VectorClock> vectorClocks = catFile(vcLocation).stream().map(VectorClock::parseVectorClock).toList();
+
+        return IntStream.range(0, Math.min(messages.size(), vectorClocks.size()))
+                .mapToObj(i -> new Message(messages.get(i), vectorClocks.get(i)))
+                .toList();
     }
 
     // Returns the list of participants for a given chat room
@@ -60,6 +62,17 @@ class StorageReader {
             participants.add(new Participant(i++, usernames.next(), ipAddresses.next()));
         }
         return participants;
+    }
+
+    public List<Message> getUnsentMessages(String roomId) {
+        Iterator<String> messages = catFile(Paths.get(roomId, "unsent_msg.txt")).iterator();
+        Iterator<String> vectorClocks = catFile(Paths.get(roomId, "unsent_vc.txt")).iterator();
+
+        List<Message> unsentMessages = new ArrayList<>();
+        while (messages.hasNext() && vectorClocks.hasNext()) {
+            unsentMessages.add(new Message(messages.next(), VectorClock.parseVectorClock(vectorClocks.next())));
+        }
+        return unsentMessages;
     }
 
 

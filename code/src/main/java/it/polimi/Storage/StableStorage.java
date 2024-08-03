@@ -1,5 +1,6 @@
 package it.polimi.Storage;
 
+import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 
@@ -39,6 +40,8 @@ public class StableStorage {
         sw.createFile(roomDir.resolve(Paths.get("delayed", "messages.txt")));
         sw.createFile(roomDir.resolve(Paths.get("delayed", "vector_clocks.txt")));
 
+        sw.createFile(roomDir.resolve("unsent_msg.txt"));
+        sw.createFile(roomDir.resolve("unsent_vc.txt"));
         //
         // Initialize files
         //
@@ -85,73 +88,95 @@ public class StableStorage {
     }
 
     // DELIVERED - Saves a message to stable storage, along with the vector clock
-    public void deliverMessage(String roomId, String message, VectorClock newVC) {
+    public void deliverMessage(String roomId, Message message) {
         VectorClock currentVC = getCurrentVectorClock(roomId);
+        VectorClock newVC = message.vectorClock();
 
         sw.append(Paths.get(roomId, "vector_clocks.txt"), newVC.toString() + '\n');
-        sw.append(Paths.get(roomId, "messages.txt"), message.replace("\n", " ") + '\n');
+        sw.append(Paths.get(roomId, "messages.txt"), message.text() + '\n');
         sw.overwrite(Paths.get(roomId, "last_vc.txt"), currentVC.merge(newVC).toString());
     }
 
     // DELAYED - saves a message to stable storage, along with the vector clock
     // messages are stored in order based on their vector clocks
-    public void delayMessage(String roomId, String message, VectorClock newVC) {
-        List<VectorClock> vectorClocks = sr.getDelayedVectorClocks(roomId);
-        List<String> messages = sr.getDelayedMessages(roomId);
+    public void delayMessage(String roomId, Message message) {
+        List<Message> messages = sr.getDelayedMessages(roomId);
         StringBuilder vcSB = new StringBuilder();
         StringBuilder msgSB = new StringBuilder();
         boolean ok = false;
 
+        String newText = message.text();
+        VectorClock newVC = message.vectorClock();
         // If there are no other delayed messages OR the new vc is older than all other saved, just insert the new message in front
-        if (vectorClocks.isEmpty() || newVC.isOlder(vectorClocks.getFirst())) {
+        if (messages.isEmpty() || newVC.isOlder(messages.getFirst().vectorClock())) {
             vcSB.append(newVC).append('\n');
-            msgSB.append(message.replace("\n", " ")).append('\n');
+            msgSB.append(newText).append('\n');
             ok = true;
         }
 
-        for (int i = 0; i < vectorClocks.size(); i++) {
-            vcSB.append(vectorClocks.get(i)).append('\n');
-            msgSB.append(messages.get(i).replace("\n", " ")).append('\n');
-            if (newVC.canBeDeliveredAfter(vectorClocks.get(i)) && !ok) {
+        for (Message msg : messages) {
+            // If the message is a duplicate, don't save it again
+            if(msg.vectorClock().toString().equals(newVC.toString())) return;
+
+            vcSB.append(msg.vectorClock()).append('\n');
+            msgSB.append(msg.text()).append('\n');
+            if (newVC.canBeDeliveredAfter(msg.vectorClock()) && !ok) {
                 vcSB.append(newVC).append('\n');
-                msgSB.append(message.replace("\n", " ")).append('\n');
+                msgSB.append(newText).append('\n');
                 ok = true;
             }
         }
-
         if (!ok) {
             vcSB.append(newVC).append('\n');
-            msgSB.append(message.replace("\n", " ")).append('\n');
+            msgSB.append(newText).append('\n');
         }
 
         sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), vcSB.toString());
         sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), msgSB.toString());
     }
 
+
+    public void storeUnsentMessage(String roomId, Message message) {
+        sw.append(Paths.get(roomId, "unsent_msg.txt"), message.text() + '\n');
+        sw.append(Paths.get(roomId, "unsent_vc.txt"), message.vectorClock().toString() + '\n');
+    }
+
+    public List<Message> getUnsentMessages(String roomId) {
+        return sr.getUnsentMessages(roomId);
+    }
+
+    //TODO: get all messages after a certain vector clock and the ones delayed
+
+
     // Deliver all deliverable delayed messages
     public void deliverDelayedMessages(String roomId) {
-        List<String> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
-        List<VectorClock> vectorClocks = new ArrayList<>(sr.getDelayedVectorClocks(roomId));
-
+        List<Message> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
         VectorClock vc = getCurrentVectorClock(roomId);
-        int size = vectorClocks.size();
-        for (int i = 0; i < size; i++) {
-            VectorClock newVC = vectorClocks.getFirst();
+
+        int size = messages.size();
+        while (!messages.isEmpty()) {
+            Message msg = messages.getFirst();
+            VectorClock newVC = msg.vectorClock();
             if (newVC.canBeDeliveredAfter(vc)) {
                 vc = newVC;
-                deliverMessage(roomId, messages.getFirst(), newVC);
+                deliverMessage(roomId, msg);
 
                 // Remove delivered data from delayed lists
-                vectorClocks.removeFirst();
                 messages.removeFirst();
-            } else {
-                if (i == 0) return;
-                break;
-            }
+            } else break;
         }
+        if (size == messages.size()) return;
 
-        sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), listToText(vectorClocks));
-        sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), listToText(messages));
+        sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), listToText(
+                messages.stream()
+                        .map(Message::vectorClock)
+                        .toList() // List<VectorClock>
+        ));
+        sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), listToText(
+                messages.stream()
+                        .map(Message::text)
+                        .toList() // List<String>
+        ));
     }
 
     // Absolutely nukes a path
