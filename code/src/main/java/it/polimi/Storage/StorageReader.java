@@ -37,7 +37,6 @@ class StorageReader {
         return VectorClock.parseVectorClock(vc);
     }
 
-
     // Returns a list of all delayed messages for a given chat room
     public List<Message> getDelayedMessages(String roomId) {
         Path msgLocation = Paths.get(PATH, roomId, "delayed", "messages.txt");
@@ -64,6 +63,7 @@ class StorageReader {
         return participants;
     }
 
+    // Returns a list of all messages that have not been sent yet
     public List<Message> getUnsentMessages(String roomId) {
         Iterator<String> messages = catFile(Paths.get(roomId, "unsent_msg.txt")).iterator();
         Iterator<String> vectorClocks = catFile(Paths.get(roomId, "unsent_vc.txt")).iterator();
@@ -75,5 +75,15 @@ class StorageReader {
         return unsentMessages;
     }
 
+    // Returns a list of all messages for a given chat room
+    public List<Message> getMessages(String roomId) {
+        List<String> text = catFile(Paths.get(PATH, roomId, "messages.txt"));
+        List<VectorClock> vectorClocks = catFile(Paths.get(PATH, roomId, "vector_clocks.txt")).stream()
+                .map(VectorClock::parseVectorClock)
+                .toList();
 
+        return IntStream.range(0, Math.min(text.size(), vectorClocks.size()))
+                .mapToObj(i -> new Message(text.get(i), vectorClocks.get(i)))
+                .toList();
+    }
 }

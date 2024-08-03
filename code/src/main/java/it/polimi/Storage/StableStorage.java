@@ -116,7 +116,7 @@ public class StableStorage {
 
         for (Message msg : messages) {
             // If the message is a duplicate, don't save it again
-            if(msg.vectorClock().toString().equals(newVC.toString())) return;
+            if (msg.vectorClock().toString().equals(newVC.toString())) return;
 
             vcSB.append(msg.vectorClock()).append('\n');
             msgSB.append(msg.text()).append('\n');
@@ -135,18 +135,22 @@ public class StableStorage {
         sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), msgSB.toString());
     }
 
-
+    // Stores an unsent message to stable storage
     public void storeUnsentMessage(String roomId, Message message) {
         sw.append(Paths.get(roomId, "unsent_msg.txt"), message.text() + '\n');
         sw.append(Paths.get(roomId, "unsent_vc.txt"), message.vectorClock().toString() + '\n');
     }
 
+    // Returns a list of all unsent messages
     public List<Message> getUnsentMessages(String roomId) {
         return sr.getUnsentMessages(roomId);
     }
 
-    //TODO: get all messages after a certain vector clock and the ones delayed
-
+    // Deletes all unsent messages
+    public void deleteUnsentMessages(String roomId) {
+        sw.overwrite(Paths.get(roomId, "unsent_msg.txt"), "");
+        sw.overwrite(Paths.get(roomId, "unsent_vc.txt"), "");
+    }
 
     // Deliver all deliverable delayed messages
     public void deliverDelayedMessages(String roomId) {
@@ -177,6 +181,39 @@ public class StableStorage {
                         .map(Message::text)
                         .toList() // List<String>
         ));
+    }
+
+
+    // Returns all messages that could be delivered after a given message ~ may contain messages already delivered!!
+    public List<Message> getMessagesAfter(String roomId, Message message) {
+        VectorClock vc = message.vectorClock();
+        List<Message> messages = new ArrayList<>(sr.getMessages(roomId));
+        List<Message> delayed = new ArrayList<>(sr.getDelayedMessages(roomId));
+        List<Message> result = new ArrayList<>();
+
+        boolean flag = false;
+        for (Message msg : messages) {
+            if (flag) result.add(msg);
+            else if (msg.vectorClock().equals(vc)) flag = true;
+            else if (vc.isYoungerExceptForOne(msg.vectorClock()) && !msg.vectorClock().isOlder(vc)) {
+                result.add(msg);
+                flag = true;
+            }
+        }
+
+        if (flag) result.addAll(delayed);
+        else {
+            for (Message msg : delayed) {
+                if (flag) result.add(msg);
+                else if (msg.vectorClock().equals(vc)) flag = true;
+                else if (vc.isYoungerExceptForOne(msg.vectorClock()) && !msg.vectorClock().isOlder(vc)) {
+                    result.add(msg);
+                    flag = true;
+                }
+            }
+        }
+
+        return result;
     }
 
     // Absolutely nukes a path

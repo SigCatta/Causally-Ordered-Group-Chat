@@ -26,10 +26,21 @@ public record VectorClock(List<Integer> vector) {
         return count <= 1;
     }
 
+    // True if this vector clock is surely older than the one passed as argument
     public boolean isOlder(VectorClock other) {
         List<Integer> otherVector = other.vector();
         for (int i = 0; i < otherVector.size(); i++) {
-            if(vector.get(i) > otherVector.get(i)) return false;
+            if (vector.get(i) > otherVector.get(i)) return false;
+        }
+        return true;
+    }
+
+    public boolean isYoungerExceptForOne(VectorClock other) {
+        List<Integer> otherVector = other.vector();
+        int count = 0;
+        for (int i = 0; i < otherVector.size(); i++) {
+            if (vector.get(i) > otherVector.get(i)) count++;
+            if (count > 1) return false;
         }
         return true;
     }
