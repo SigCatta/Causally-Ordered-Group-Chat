@@ -2,13 +2,14 @@ package it.polimi.Storage;
 
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+
 
 import java.util.List;
 
 public class StableStorageTest {
     @Test
-    void threeDelayedAllDelivered() {
+    public void threeDelayedAllDelivered() {
         Participant p1 = new Participant(0, "1", "1.1.1.1");
         Participant p2 = new Participant(1, "2", "2.2.2.2");
         Participant p3 = new Participant(2, "3", "3.3.3.3");
@@ -31,7 +32,7 @@ public class StableStorageTest {
     }
 
     @Test
-    void fourDelayedThreeDelivered() {
+    public void fourDelayedThreeDelivered() {
         Participant p1 = new Participant(0, "1", "1.1.1.1");
         Participant p2 = new Participant(1, "2", "2.2.2.2");
         Participant p3 = new Participant(2, "3", "3.3.3.3");

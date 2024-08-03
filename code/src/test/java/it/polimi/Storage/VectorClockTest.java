@@ -2,15 +2,16 @@ package it.polimi.Storage;
 
 
 import it.polimi.Entities.VectorClock;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
-class VectorClockTest {
+
+public class VectorClockTest {
     @Test
-    void testCanBeDeliveredAfter() {
+    public void testCanBeDeliveredAfter() {
         VectorClock vc1 = new VectorClock(List.of(0, 0, 0));
         VectorClock vc2 = new VectorClock(List.of(1, 0, 0));
         VectorClock vc3 = new VectorClock(List.of(1, 1, 0));
@@ -47,7 +48,7 @@ class VectorClockTest {
     }
 
     @Test
-    void testMerge(){
+    public void testMerge(){
         VectorClock vc1 = new VectorClock(List.of(0, 0, 0));
         VectorClock vc2 = new VectorClock(List.of(1, 0, 0));
 
