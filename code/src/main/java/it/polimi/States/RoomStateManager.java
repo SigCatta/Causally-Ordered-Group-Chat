@@ -5,6 +5,9 @@ public class RoomStateManager {
     private RoomState currentState;
     private String roomName;
     private Boolean isConnected;
+    private String ip;
+    private int port;
+    private String username;
 
     private RoomStateManager() {
         currentState = HomeState.getInstance();
@@ -34,11 +37,36 @@ public class RoomStateManager {
         this.roomName = roomName;
     }
 
+
     public Boolean getConnected() {
         return isConnected;
     }
 
     public void setConnected(Boolean connected) {
         isConnected = connected;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

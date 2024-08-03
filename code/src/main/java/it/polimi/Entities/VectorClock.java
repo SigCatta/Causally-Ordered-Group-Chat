@@ -1,10 +1,11 @@
 package it.polimi.Entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public record VectorClock(List<Integer> vector) {
+public record VectorClock(List<Integer> vector) implements Serializable {
 
     // True if this vector clock can be delivered after the one passed as argument
     public boolean canBeDeliveredAfter(VectorClock after) {

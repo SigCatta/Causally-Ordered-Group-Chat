@@ -8,7 +8,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
+
 
 public class StableStorageTest {
     @Test
@@ -59,7 +60,7 @@ public class StableStorageTest {
     }
 
     @Test
-    void unsentMessagesTest() {
+    public void unsentMessagesTest() {
         Participant p1 = new Participant(0, "1", "1.1.1.1");
         Participant p2 = new Participant(1, "2", "2.2.2.2");
         Participant p3 = new Participant(2, "3", "3.3.3.3");

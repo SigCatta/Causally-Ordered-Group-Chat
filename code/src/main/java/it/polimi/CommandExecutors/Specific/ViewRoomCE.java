@@ -13,8 +13,8 @@ public class ViewRoomCE implements CommandExecutor {
         if(RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance()){
         Scanner scanner = new Scanner(System.in);
         System.out.println("Which room you want to enter?");
-        // TODO: checks on the list of rooms
         String roomName = scanner.nextLine();
+
         RoomStateManager.getInstance().setRoomName(roomName);
         RoomStateManager.getInstance().setCurrentState(InRoomState.getInstance());
     }}

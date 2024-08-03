@@ -16,11 +16,14 @@ public class ClientHandler implements Runnable {
     private final int port;
     private RoomStateManager state;
 
-    public ClientHandler(Socket clientSocket, String ip, int port) {
+    public ClientHandler(Socket clientSocket, String ip, int port, String username) {
         this.clientSocket = clientSocket;
         this.ip = ip;
         this.port = port;
         this.state = RoomStateManager.getInstance();
+        RoomStateManager.getInstance().setUsername(username);
+        RoomStateManager.getInstance().setIp(ip);
+        RoomStateManager.getInstance().setPort(port);
         this.state.setConnected(true);
         setupStreams();
     }
@@ -41,7 +44,7 @@ public class ClientHandler implements Runnable {
             handleClientConnection();
         } catch (Exception e) {
             System.out.println("Connection lost. Attempting to reconnect...");
-            new Thread(this::reconnectInBackground).start(); // Start reconnection in a new thread
+          //  new Thread(this::reconnectInBackground).start(); // Start reconnection in a new thread
         }
     }
 

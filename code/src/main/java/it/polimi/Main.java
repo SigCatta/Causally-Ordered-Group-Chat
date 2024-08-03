@@ -11,19 +11,22 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println("Insert username:");
+        String username = scanner.next();
+
         System.out.print("Insert IP address: ");
-        String ip = scanner.nextLine();
+        String ip = scanner.next();
 
         System.out.print("Insert a valid port: ");
         int port = scanner.nextInt();
 
         // Start the server thread
-        new Thread(() -> startListening(ip, port)).start();
+        new Thread(() -> startListening(ip, port, username)).start();
 
        readLine();
     }
 
-    public static void startListening(String ip, int port) {
+    public static void startListening(String ip, int port, String username) {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
@@ -31,7 +34,7 @@ public class Main {
 
                     client.setSoTimeout(10000);
 
-                    ClientHandler clientHandler = new ClientHandler(client, ip, port);
+                    ClientHandler clientHandler = new ClientHandler(client, ip, port, username);
                     Thread thread = new Thread(clientHandler, "ss_handler" + client.getInetAddress());
                     thread.start();
                 } catch (Exception e) {
