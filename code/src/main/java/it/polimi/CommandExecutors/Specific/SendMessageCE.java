@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class SendMessageCE implements CommandExecutor {
     @Override
     public void execute() {
-        if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
+       // if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
         // TODO: change the delivery of the message to the list of the current set room members checking the connection is still active
         Scanner scanner = new Scanner(System.in);
         System.out.print("Insert IP address: ");
@@ -30,5 +30,5 @@ public class SendMessageCE implements CommandExecutor {
             e.printStackTrace();
             RoomStateManager.getInstance().setConnected(false);
         }}
-    }
+   // }
 }

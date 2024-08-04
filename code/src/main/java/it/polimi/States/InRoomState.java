@@ -1,5 +1,6 @@
 package it.polimi.States;
 
+import it.polimi.Entities.Participant;
 import it.polimi.Message.HelloMessage;
 import it.polimi.Message.Message;
 import it.polimi.Message.NewRoomMessage;
@@ -20,6 +21,11 @@ public class InRoomState implements RoomState{
 
     @Override
     public void handle(NewRoomMessage message) {
+        for(Participant p : message.getParticipants()){
+            if(p.name().equals(RoomStateManager.getInstance().getUsername())){
+                message.getParticipants().remove(p);
+            }
+        }
         System.out.println("NOTIFICATION : "+message.getContent());
         StableStorage storage = new StableStorage();
         storage.initNewRoom(message.getRoomName(), message.getParticipants());

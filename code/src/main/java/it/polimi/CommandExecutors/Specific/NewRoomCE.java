@@ -44,14 +44,15 @@ public class NewRoomCE implements CommandExecutor {
                 Integer userPort = scanner.nextInt();
                 scanner.nextLine();
                 ports.add(userPort);
-                System.out.println("dati"+userName+userIP+userPort);
                 participants.add(new Participant(i, userName, userIP));
             }
             StableStorage ss = new StableStorage();
             ss.initNewRoom(roomName, participants);
 
-            participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp()));
-            NewRoomMessage message = new NewRoomMessage(roomName, participants);
+
+           participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp()));
+           ports.add(RoomStateManager.getInstance().getPort());
+           NewRoomMessage message = new NewRoomMessage(roomName, participants);
             for (Participant participant : participants) {
                 sendRoomCreationMessage(participant, message, ports.get(participant.index()));
             }

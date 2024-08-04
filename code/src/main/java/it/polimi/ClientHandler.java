@@ -3,6 +3,7 @@ package it.polimi;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomStateManager;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -33,7 +34,7 @@ public class ClientHandler implements Runnable {
             this.output = new ObjectOutputStream(clientSocket.getOutputStream());
             this.input = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
-            System.out.println("Error setting up streams: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -76,22 +77,24 @@ public class ClientHandler implements Runnable {
             if (clientSocket != null) {
                 clientSocket.close();
             }
-            RoomStateManager.getInstance().setConnected(false);
+          //  RoomStateManager.getInstance().setConnected(false);
         } catch (IOException e) {
             System.out.println("Failed to close client connection: " + e.getMessage());
         }
     }
 
-    private void handleClientConnection() throws IOException, ClassNotFoundException {
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
+    private void handleClientConnection() {
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
                 Message message = (Message) input.readObject();
+                System.out.println("Received message: " + message);
                 message.process(state.getCurrentState());
-            } catch (ClassCastException | ClassNotFoundException | IOException e) {
-                System.out.println("Error in handling client connection: " + e.getMessage());
-                disconnect();
-                throw e; // Rethrow to trigger reconnection
             }
+        }
+        catch (Exception e) {
+           // System.out.println("Unexpected exception: " + e.getMessage());
+           // e.printStackTrace();
+            disconnect();
         }
     }
 }
