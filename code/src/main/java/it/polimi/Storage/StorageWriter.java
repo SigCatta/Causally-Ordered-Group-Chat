@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 class StorageWriter {
-    private final Path PATH = Paths.get(System.getProperty("user.home"), "chat_ss");
+    private final Path PATH = Paths.get(System.getProperty("user.home"), "chat_ss", RoomStateManager.getInstance().getUsername());
 
     // Appends a String to a file
     public void append(Path relative, String string) {
@@ -53,6 +53,7 @@ class StorageWriter {
 
     // Creates all the missing directories in a path
     private void createMissingDirectories(Path relative) {
+        createBaseDirectories();
         Iterator<Path> directories = relative.iterator();
         Path dir = PATH;
 
@@ -70,6 +71,7 @@ class StorageWriter {
         }
     }
 
+    // True if the indicated directory exists
     public boolean directoryExists(Path location) {
         return Files.exists(location) && Files.isDirectory(location);
     }
@@ -98,5 +100,24 @@ class StorageWriter {
             throw new IllegalArgumentException("Invalid path: " + relative);
         }
         return location;
+    }
+
+    // Creates the all directories needed in the PATH constant
+    private void createBaseDirectories() {
+        Path chatRoot = Paths.get(System.getProperty("user.home"), "chat_ss");
+        if (!Files.exists(chatRoot)) {
+            try {
+                Files.createDirectory(chatRoot);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (!Files.exists(PATH)) {
+            try {
+                Files.createDirectory(PATH);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

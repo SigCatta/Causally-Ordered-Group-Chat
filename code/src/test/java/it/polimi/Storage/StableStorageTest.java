@@ -3,8 +3,8 @@ package it.polimi.Storage;
 import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
+import it.polimi.States.RoomStateManager;
 import org.junit.Test;
-
 
 import java.util.List;
 
@@ -18,6 +18,8 @@ public class StableStorageTest {
         Participant p2 = new Participant(1, "2", "2.2.2.2");
         Participant p3 = new Participant(2, "3", "3.3.3.3");
 
+        String username = "username_di_prova";
+        RoomStateManager.getInstance().setUsername(username);
         StableStorage ss = new StableStorage();
         ss.initNewRoom("test", List.of(p1, p2, p3));
 
@@ -41,6 +43,8 @@ public class StableStorageTest {
         Participant p2 = new Participant(1, "2", "2.2.2.2");
         Participant p3 = new Participant(2, "3", "3.3.3.3");
 
+        String username = "username_di_prova";
+        RoomStateManager.getInstance().setUsername(username);
         StableStorage ss = new StableStorage();
         ss.initNewRoom("test", List.of(p1, p2, p3));
 
@@ -65,6 +69,8 @@ public class StableStorageTest {
         Participant p2 = new Participant(1, "2", "2.2.2.2");
         Participant p3 = new Participant(2, "3", "3.3.3.3");
 
+        String username = "username_di_prova";
+        RoomStateManager.getInstance().setUsername(username);
         StableStorage ss = new StableStorage();
         ss.initNewRoom("test", List.of(p1, p2, p3));
 

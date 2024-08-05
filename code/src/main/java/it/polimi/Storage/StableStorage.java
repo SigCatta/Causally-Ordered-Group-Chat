@@ -3,9 +3,7 @@ package it.polimi.Storage;
 import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
-import it.polimi.States.RoomStateManager;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -24,8 +22,7 @@ public class StableStorage {
 
     // Creates and initializes all the files needed for a chat room
     public void initNewRoom(String roomId, List<Participant> participants) {
-        String effectivePath = RoomStateManager.getInstance().getUsername()+"/"+roomId;
-        Path roomDir = Paths.get(effectivePath);
+        Path roomDir = Paths.get(roomId);
         int size = participants.size();
         if (size < 2) {
             System.out.println("Go get some friends...");
@@ -187,7 +184,6 @@ public class StableStorage {
         ));
     }
 
-
     // Returns all messages that could be delivered after a given message ~ may contain messages already delivered!!
     public List<Message> getMessagesAfter(String roomId, Message message) {
         VectorClock vc = message.vectorClock();
@@ -237,6 +233,7 @@ public class StableStorage {
         return sr.doesRoomExist(roomName);
     }
 
+    // Returns a list of all room names
     public List<String> getRoomNames() {
         return sr.getDirectoriesUnderPath();
     }

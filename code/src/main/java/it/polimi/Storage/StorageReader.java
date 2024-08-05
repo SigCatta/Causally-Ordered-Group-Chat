@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 
 class StorageReader {
     // Initialize the PATH variable, this is the directory where all files will be stored
-    private final String PATH = String.valueOf(Paths.get(System.getProperty("user.home"), "chat_ss",RoomStateManager.getInstance().getUsername()));
+    private final String PATH = String.valueOf(Paths.get(System.getProperty("user.home"), "chat_ss", RoomStateManager.getInstance().getUsername()));
 
     // Reads all lines from a file
     private List<String> catFile(Path path) {
@@ -89,6 +89,7 @@ class StorageReader {
                 .toList();
     }
 
+    // Method to check if a room exists
     public boolean doesRoomExist(String roomName) {
         // Construct the path to the directory
         Path roomPath = Paths.get(PATH, roomName);
