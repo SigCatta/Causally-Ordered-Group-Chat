@@ -13,15 +13,20 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NewRoomCE implements CommandExecutor {
-    private void sendRoomCreationMessage(Participant participant, NewRoomMessage message, Integer port) {
-        try (Socket socket = new Socket(participant.ipAddress(), port);
+    private void sendRoomCreationMessage(Participant participant, NewRoomMessage message) {
+        String[] parts = participant.ipAddress().split(":");
+        int port = Integer.parseInt(parts[1]);
+        try (Socket socket = new Socket(parts[0], port);
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             out.writeObject(message);
-            out.reset();
+            out.flush();
         } catch (IOException e) {
             System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
+            //TODO : consider the fact that this specific user must be notified when reconnecting
             e.printStackTrace();
         }
     }
@@ -31,10 +36,9 @@ public class NewRoomCE implements CommandExecutor {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Insert the name of the room: ");
             String roomName = scanner.nextLine();
-            System.out.println("Insert number of users for this room: ");
+            System.out.println("Insert number of users to add (except you): ");
             Integer numberOfUsers = scanner.nextInt();
             List<Participant> participants = new ArrayList<>();
-            List<Integer> ports = new ArrayList<>();
             for(int i = 0; i < numberOfUsers; i++){
                 System.out.println("Insert the name of the user: ");
                 String userName = scanner.next();
@@ -43,19 +47,20 @@ public class NewRoomCE implements CommandExecutor {
                 System.out.println("Insert the port of the user: ");
                 Integer userPort = scanner.nextInt();
                 scanner.nextLine();
-                ports.add(userPort);
+                userIP = userIP+":"+userPort;
                 participants.add(new Participant(i, userName, userIP));
             }
+            participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort()));
             StableStorage ss = new StableStorage();
             ss.initNewRoom(roomName, participants);
 
-
-           participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp()));
-           ports.add(RoomStateManager.getInstance().getPort());
            NewRoomMessage message = new NewRoomMessage(roomName, participants);
+           ExecutorService executor = Executors.newFixedThreadPool(10);
             for (Participant participant : participants) {
-                sendRoomCreationMessage(participant, message, ports.get(participant.index()));
-            }
+                executor.submit(() -> {
+              if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
+                sendRoomCreationMessage(participant, message);
+            }});}
         }
 
     }

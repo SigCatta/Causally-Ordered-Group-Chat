@@ -4,11 +4,20 @@ import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.States.HomeState;
 import it.polimi.States.InRoomState;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.StableStorage;
+
+import java.util.List;
 
 public class ListRoomsCE implements CommandExecutor {
     @Override
     public void execute() {
-        if(RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance()){}
-        // TODO: show the list of the rooms of this specific user
+        if(RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance()){
+            StableStorage storage = new StableStorage();
+            List<String> rooms = storage.getRoomNames();
+            System.out.println("Rooms available: ");
+            for(String room : rooms){
+                System.out.println(room);
+            }
+        }
     }
 }

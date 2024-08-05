@@ -1,5 +1,7 @@
 package it.polimi.Storage;
 
+import it.polimi.States.RoomStateManager;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;

@@ -3,7 +3,9 @@ package it.polimi.Storage;
 import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
+import it.polimi.States.RoomStateManager;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 
 public class StableStorage {
     private final StorageWriter sw;
+
     private final StorageReader sr;
 
     public StableStorage() {
@@ -21,7 +24,8 @@ public class StableStorage {
 
     // Creates and initializes all the files needed for a chat room
     public void initNewRoom(String roomId, List<Participant> participants) {
-        Path roomDir = Paths.get(roomId);
+        String effectivePath = RoomStateManager.getInstance().getUsername()+"/"+roomId;
+        Path roomDir = Paths.get(effectivePath);
         int size = participants.size();
         if (size < 2) {
             System.out.println("Go get some friends...");
@@ -226,5 +230,14 @@ public class StableStorage {
         return list.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining("\n"));
+    }
+
+    // Method to check if a directory exists at PATH/roomName
+    public boolean doesRoomExist(String roomName) {
+        return sr.doesRoomExist(roomName);
+    }
+
+    public List<String> getRoomNames() {
+        return sr.getDirectoriesUnderPath();
     }
 }

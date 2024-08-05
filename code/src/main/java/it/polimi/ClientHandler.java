@@ -44,7 +44,7 @@ public class ClientHandler implements Runnable {
             System.out.println("Starting handling message");
             handleClientConnection();
         } catch (Exception e) {
-            System.out.println("Connection lost. Attempting to reconnect...");
+            disconnect();
           //  new Thread(this::reconnectInBackground).start(); // Start reconnection in a new thread
         }
     }
@@ -74,6 +74,9 @@ public class ClientHandler implements Runnable {
             if (input != null) {
                 input.close();
             }
+            if (output != null) {
+                output.close();
+            }
             if (clientSocket != null) {
                 clientSocket.close();
             }
@@ -87,13 +90,10 @@ public class ClientHandler implements Runnable {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 Message message = (Message) input.readObject();
-                System.out.println("Received message: " + message);
                 message.process(state.getCurrentState());
             }
         }
         catch (Exception e) {
-           // System.out.println("Unexpected exception: " + e.getMessage());
-           // e.printStackTrace();
             disconnect();
         }
     }
