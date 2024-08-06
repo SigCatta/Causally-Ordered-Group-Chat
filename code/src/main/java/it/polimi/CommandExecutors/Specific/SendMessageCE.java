@@ -1,34 +1,55 @@
 package it.polimi.CommandExecutors.Specific;
 
 import it.polimi.CommandExecutors.CommandExecutor;
+import it.polimi.Entities.Message;
+import it.polimi.Entities.Participant;
+import it.polimi.Entities.VectorClock;
+import it.polimi.Message.ChatMessage;
 import it.polimi.Message.HelloMessage;
+import it.polimi.Message.NewRoomMessage;
 import it.polimi.States.InRoomState;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.StableStorage;
 
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.List;
 import java.util.Scanner;
 
 public class SendMessageCE implements CommandExecutor {
-    @Override
-    public void execute() {
-       // if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
-        // TODO: change the delivery of the message to the list of the current set room members checking the connection is still active
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Insert IP address: ");
-        String ip = scanner.nextLine();
-        System.out.print("Insert a valid port: ");
-        int port = scanner.nextInt();
-        HelloMessage message = new HelloMessage("Hello, this is a test message");
-        try (Socket socket = new Socket(ip, port);
+    private void sendMessage(Participant participant, ChatMessage message) {
+        String[] parts = participant.ipAddress().split(":");
+        int port = Integer.parseInt(parts[1]);
+        try (Socket socket = new Socket(parts[0], port);
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             out.writeObject(message);
-            out.reset();
-            System.out.println("Message sent");
-        } catch (Exception e) {
-            System.out.println("Failed to send message: " + e.getMessage());
-            e.printStackTrace();
-            RoomStateManager.getInstance().setConnected(false);
+            out.flush();
+        } catch (IOException e) {
+            //TODO : consider the fact that this specific user must be notified when reconnecting
+        }
+    }
+    @Override
+    public void execute() {
+    if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
+        Scanner scanner = new Scanner(System.in);
+        String text = scanner.nextLine();
+        text = RoomStateManager.getInstance().getUsername() + " : " + text;
+        StableStorage storage = new StableStorage();
+        VectorClock vectorClock = storage.getCurrentVectorClock(RoomStateManager.getInstance().getRoomName());
+        VectorClock updated=vectorClock.increment(storage.getIndex(RoomStateManager.getInstance().getRoomName(),RoomStateManager.getInstance().getUsername()));
+        Message m = new Message(text,updated);
+        ChatMessage chatMessage = new ChatMessage(m, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getRoomName());
+        storage.deliverMessage(RoomStateManager.getInstance().getRoomName(),m);
+        if(RoomStateManager.getInstance().getConnected()) {
+            List<Participant> participants = storage.getParticipants(RoomStateManager.getInstance().getRoomName());
+            for (Participant participant : participants) {
+                if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
+                sendMessage(participant, chatMessage);}
+            }
+        }else{
+            storage.storeUnsentMessage(RoomStateManager.getInstance().getRoomName(),m);
         }}
-   // }
+        }
 }
+

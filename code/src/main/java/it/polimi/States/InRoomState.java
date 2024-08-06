@@ -1,10 +1,8 @@
 package it.polimi.States;
 
 import it.polimi.Entities.Participant;
-import it.polimi.Message.DeleteMessage;
-import it.polimi.Message.HelloMessage;
-import it.polimi.Message.Message;
-import it.polimi.Message.NewRoomMessage;
+import it.polimi.Entities.VectorClock;
+import it.polimi.Message.*;
 import it.polimi.Storage.StableStorage;
 
 public class InRoomState implements RoomState{
@@ -33,5 +31,21 @@ public class InRoomState implements RoomState{
         StableStorage storage = new StableStorage();
         storage.delete(message.getRoomName());
         RoomStateManager.getInstance().setCurrentState(HomeState.getInstance());
+    }
+
+    @Override
+    public void handle(ChatMessage message) {
+        StableStorage storage = new StableStorage();
+        VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
+        if(message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)){
+            storage.deliverMessage(message.getRoomName(),message.getMessage());
+            message.getMessage().vectorClock().merge(vectorClock);
+        }else{
+            storage.delayMessage(message.getRoomName(),message.getMessage());
+            message.getMessage().vectorClock().merge(vectorClock);
+        }
+        if(RoomStateManager.getInstance().getRoomName().equals(message.getRoomName())) {
+            System.out.println(message.getMessage().text());
+        }else{ System.out.println("NOTIFICATION : "+message.getContent());}
     }
 }

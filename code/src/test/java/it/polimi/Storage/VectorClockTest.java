@@ -27,7 +27,6 @@ public class VectorClockTest {
         assertFalse(vcf.canBeDeliveredAfter(vc1));
         assertThrows(Exception.class, () -> vce.canBeDeliveredAfter(vc1));
 
-
         // vc2 is the most recent delivery
         assertTrue(vc3.canBeDeliveredAfter(vc2));
         assertTrue(vc4.canBeDeliveredAfter(vc2));

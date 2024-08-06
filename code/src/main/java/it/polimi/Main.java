@@ -33,10 +33,10 @@ public class Main {
 
     public static void startListening(String ip, int port, String username) {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            RoomStateManager.getInstance().setConnected(true);
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Socket client = serverSocket.accept();
-
                     client.setSoTimeout(30000);
                     ClientHandler clientHandler = new ClientHandler(client, ip, port, username);
                     Thread thread = new Thread(clientHandler, "ss_handler" + client.getInetAddress());
@@ -47,6 +47,7 @@ public class Main {
             }
         } catch (IOException e) {
             System.out.println(e);
+            RoomStateManager.getInstance().setConnected(false);
         }
     }
 

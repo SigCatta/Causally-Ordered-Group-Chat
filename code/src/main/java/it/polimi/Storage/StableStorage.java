@@ -237,4 +237,20 @@ public class StableStorage {
     public List<String> getRoomNames() {
         return sr.getDirectoriesUnderPath();
     }
+
+    public int getIndex(String roomName, String username){
+        List<Participant> participants = getParticipants(roomName);
+        for (Participant p : participants){
+            if (p.name().equals(username)){
+                return p.index();
+            }
+        }
+        return -1;
+    }
+    public void getChat(String roomName){
+        List<Message> messages = sr.getMessages(roomName);
+        for (Message m : messages){
+            System.out.println(m.text());
+        }
+    }
 }

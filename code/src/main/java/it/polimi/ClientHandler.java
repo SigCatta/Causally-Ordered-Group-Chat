@@ -45,7 +45,8 @@ public class ClientHandler implements Runnable {
             handleClientConnection();
         } catch (Exception e) {
             disconnect();
-          //  new Thread(this::reconnectInBackground).start(); // Start reconnection in a new thread
+            RoomStateManager.getInstance().setConnected(false);
+            new Thread(this::reconnectInBackground).start(); // Start reconnection in a new thread
         }
     }
 
@@ -59,9 +60,9 @@ public class ClientHandler implements Runnable {
                 run(); // Restart handling messages once reconnected
                 break;
             } catch (IOException e) {
-                System.out.println("Reconnection failed. Retrying in 5 seconds...");
+                System.out.println("Reconnection failed. Retrying in 30 seconds...");
                 try {
-                    Thread.sleep(5000); // Wait before retrying
+                    Thread.sleep(30000); // Wait before retrying
                 } catch (InterruptedException interruptedException) {
                     Thread.currentThread().interrupt(); // Restore interrupt status
                 }
@@ -80,7 +81,6 @@ public class ClientHandler implements Runnable {
             if (clientSocket != null) {
                 clientSocket.close();
             }
-          //  RoomStateManager.getInstance().setConnected(false);
         } catch (IOException e) {
             System.out.println("Failed to close client connection: " + e.getMessage());
         }

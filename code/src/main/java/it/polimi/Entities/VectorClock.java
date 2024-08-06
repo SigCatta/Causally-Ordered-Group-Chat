@@ -48,7 +48,7 @@ public record VectorClock(List<Integer> vector) implements Serializable {
 
     // Increments the value at the given index by one
     public VectorClock increment(int index) {
-        List<Integer> newVector = List.copyOf(vector);
+        List<Integer> newVector = new ArrayList<>(vector);
         newVector.set(index, newVector.get(index) + 1);
         return new VectorClock(newVector);
     }

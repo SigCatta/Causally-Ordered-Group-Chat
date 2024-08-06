@@ -18,7 +18,9 @@ public class ViewRoomCE implements CommandExecutor {
         StableStorage storage = new StableStorage();
         if(storage.doesRoomExist(roomName)){
         RoomStateManager.getInstance().setRoomName(roomName);
-        RoomStateManager.getInstance().setCurrentState(InRoomState.getInstance());}
+        RoomStateManager.getInstance().setCurrentState(InRoomState.getInstance());
+        storage.getChat(roomName);
+        }
         else System.out.println("Room does not exist");
     }}
 }
