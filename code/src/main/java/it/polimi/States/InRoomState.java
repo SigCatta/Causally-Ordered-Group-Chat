@@ -29,16 +29,9 @@ public class InRoomState implements RoomState{
 
     @Override
     public void handle(DeleteMessage message) {
-        if(RoomStateManager.getInstance().getRoomName()== message.getRoomName()){
-            System.out.println("NOTIFICATION : this room has been deleted!");
-            StableStorage storage = new StableStorage();
-            storage.delete(message.getRoomName());
-        }
-        else{
-            System.out.println("NOTIFICATION : "+message.getContent());
-            StableStorage storage = new StableStorage();
-            storage.delete(message.getRoomName());
-        }
+        System.out.println("NOTIFICATION : "+message.getContent());
+        StableStorage storage = new StableStorage();
+        storage.delete(message.getRoomName());
         RoomStateManager.getInstance().setCurrentState(HomeState.getInstance());
     }
 }
