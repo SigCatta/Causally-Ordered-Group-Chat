@@ -34,12 +34,12 @@ public class HomeState implements RoomState{
 
     @Override
     public void handle(ChatMessage message) {
-        System.out.println("NOTIFICATION : "+message.getContent());
         StableStorage storage = new StableStorage();
         VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
         int index =storage.getIndex(message.getRoomName(),message.getSender());
         if(message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)){
             storage.deliverMessage(message.getRoomName(),message.getMessage());
+            System.out.println("NOTIFICATION : "+message.getContent());
         }else{
             storage.delayMessage(message.getRoomName(),message.getMessage());
         }

@@ -40,12 +40,12 @@ public class InRoomState implements RoomState{
         if(message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)){
             storage.deliverMessage(message.getRoomName(),message.getMessage());
             message.getMessage().vectorClock().merge(vectorClock);
+            if(RoomStateManager.getInstance().getRoomName().equals(message.getRoomName())) {
+                System.out.println(message.getMessage().text());
+            }else{ System.out.println("NOTIFICATION : "+message.getContent());}
         }else{
             storage.delayMessage(message.getRoomName(),message.getMessage());
             message.getMessage().vectorClock().merge(vectorClock);
         }
-        if(RoomStateManager.getInstance().getRoomName().equals(message.getRoomName())) {
-            System.out.println(message.getMessage().text());
-        }else{ System.out.println("NOTIFICATION : "+message.getContent());}
     }
 }

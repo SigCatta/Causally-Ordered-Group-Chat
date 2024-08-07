@@ -18,6 +18,6 @@ public class CommandExecutorFactory {
             case "exit-room":
                 return new ExitRoomCE();
         }
-        return new InvalidCE();
+        return new InvalidCE(command);
     }
 }

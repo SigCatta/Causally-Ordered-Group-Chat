@@ -250,7 +250,8 @@ public class StableStorage {
     public void getChat(String roomName){
         List<Message> messages = sr.getMessages(roomName);
         for (Message m : messages){
-            System.out.println(m.text());
+            if(!m.text().equals("Chat room created successfully"))
+            {System.out.println(m.text());}
         }
     }
 }

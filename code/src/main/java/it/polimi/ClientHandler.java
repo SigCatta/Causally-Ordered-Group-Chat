@@ -41,7 +41,6 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Starting handling message");
             handleClientConnection();
         } catch (Exception e) {
             disconnect();
