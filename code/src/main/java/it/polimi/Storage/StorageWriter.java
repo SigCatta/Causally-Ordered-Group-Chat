@@ -103,8 +103,10 @@ class StorageWriter {
     }
 
     // Creates the all directories needed in the PATH constant
+    // TODO -> should be called in the main function, after RoomStateManager.getInstance().getUsername() is initialized, then never again...
     private void createBaseDirectories() {
         Path chatRoot = Paths.get(System.getProperty("user.home"), "chat_ss");
+
         if (!Files.exists(chatRoot)) {
             try {
                 Files.createDirectory(chatRoot);
@@ -115,6 +117,21 @@ class StorageWriter {
         if (!Files.exists(PATH)) {
             try {
                 Files.createDirectory(PATH);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!Files.exists(PATH.resolve("ip_ring.txt"))) {
+            try {
+                Files.createFile(PATH.resolve("ip_ring.txt"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (!Files.exists(PATH.resolve("rooms_ring.txt"))) {
+            try {
+                Files.createFile(PATH.resolve("rooms_ring.txt"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
