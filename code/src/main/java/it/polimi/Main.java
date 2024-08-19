@@ -25,6 +25,14 @@ public class Main {
         state.setIp(ip);
         state.setPort(port);
         state.setUsername(username);
+
+        System.out.println("Insert IP of a member:");
+        String memberIp = scanner.next();
+
+        System.out.println("Insert port of a member:");
+        int memberPort = scanner.nextInt();
+        reconnectionToList(memberIp, memberPort);
+
         // Start the server thread
         new Thread(() -> startListening(ip, port, username)).start();
 
@@ -68,5 +76,10 @@ public class Main {
         }
 
         scanner.close();
+    }
+
+    public static void reconnectionToList(String ip,Integer port){
+        // sending information for the first time
+        // getting info about who has already joined
     }
 }

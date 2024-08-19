@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ReplicationManager {
+    private static ReplicationManager instance;
     private final ConcurrentHashMap<String, String> usernamesMap;
     private final ConcurrentHashMap<String, List<String>> roomsMap;
     private final List<String> deletedRoomsList;
@@ -14,6 +15,13 @@ public class ReplicationManager {
         this.usernamesMap = new ConcurrentHashMap<>();
         this.roomsMap = new ConcurrentHashMap<>();
         this.deletedRoomsList = new ArrayList<>();
+    }
+
+    public static ReplicationManager getInstance() {
+        if (instance == null) {
+            instance = new ReplicationManager();
+        }
+        return instance;
     }
 
     public List<String> getDeletedRoomsList() {
