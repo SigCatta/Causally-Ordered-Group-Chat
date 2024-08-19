@@ -1,9 +1,8 @@
 package it.polimi.Storage;
 
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class ReplicationManager {
     private static ReplicationManager instance;
@@ -11,10 +10,16 @@ public class ReplicationManager {
     private final ConcurrentHashMap<String, List<String>> roomsMap;
     private final List<String> deletedRoomsList;
 
-    public ReplicationManager() {
+    private final String[] roomNodes;
+    private final String[] userNodes;
+
+    private ReplicationManager() {
         this.usernamesMap = new ConcurrentHashMap<>();
         this.roomsMap = new ConcurrentHashMap<>();
         this.deletedRoomsList = new ArrayList<>();
+
+        this.roomNodes = new String[26];
+        this.userNodes = new String[26];
     }
 
     public static ReplicationManager getInstance() {
@@ -36,9 +41,44 @@ public class ReplicationManager {
         return usernamesMap;
     }
 
+    public String[] getRoomNodes() {
+        return roomNodes;
+    }
+
+    public String[] getUserNodes() {
+        return userNodes;
+    }
+
+    public void updateRoomNode(String node, int index) {
+        roomNodes[index] = node;
+    }
+
+    public void updateUserNode(String node, int index) {
+        userNodes[index] = node;
+    }
+
+    public void setRoomNodes(String[] roomNodes) {
+        System.arraycopy(roomNodes, 0, this.roomNodes, 0, roomNodes.length);
+    }
+
+    public void setUserNodes(String[] userNodes) {
+        System.arraycopy(userNodes, 0, this.userNodes, 0, userNodes.length);
+    }
+
     //
     // ROOMS NODE
     //
+
+    // Returns the node that is handling the most rooms
+    public String chooseRoomNodeToHelp() {
+        return Arrays.stream(roomNodes)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(node -> node, Collectors.summingInt(node -> 1)))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
 
     // Adds all data inherited from a previous rooms node
     public void becomeRoomsNode(List<String> deletedRooms, ConcurrentHashMap<String, List<String>> roomMembers) {
@@ -79,6 +119,17 @@ public class ReplicationManager {
     //
     // USERS NODE
     //
+
+    // Returns the node that is handling the most usernames
+    public String chooseUserNodeToHelp() {
+        return Arrays.stream(userNodes)
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(node -> node, Collectors.summingInt(node -> 1)))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
 
     // Adds a user or updates its ip address
     public void addUser(String username, String ipAddress) {
