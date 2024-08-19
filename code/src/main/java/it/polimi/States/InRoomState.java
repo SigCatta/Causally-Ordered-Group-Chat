@@ -5,6 +5,11 @@ import it.polimi.Entities.VectorClock;
 import it.polimi.Message.*;
 import it.polimi.Storage.StableStorage;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.List;
+
 public class InRoomState implements RoomState{
     private static InRoomState instance;
     public static InRoomState getInstance() {
@@ -46,6 +51,41 @@ public class InRoomState implements RoomState{
         }else{
             storage.delayMessage(message.getRoomName(),message.getMessage());
             message.getMessage().vectorClock().merge(vectorClock);
+        }
+    }
+    @Override
+    public void handle(UpdateChatRequestMessage message) {
+        StableStorage storage = new StableStorage();
+        VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
+        // getting unsent messages from the user just connected
+        for(it.polimi.Entities.Message msg : message.getUnsentMessages()){
+            if(msg.vectorClock().canBeDeliveredAfter(vectorClock)){
+                storage.deliverMessage(message.getRoomName(),msg);
+                msg.vectorClock().merge(vectorClock);
+                if(RoomStateManager.getInstance().getRoomName().equals(message.getRoomName()))
+                {System.out.println(msg.text());}
+            }else{
+                storage.delayMessage(message.getRoomName(),msg);
+                msg.vectorClock().merge(vectorClock);
+            }
+        }
+        // sending its vector clock and the chat messages
+        List<it.polimi.Entities.Message> chatmessages = storage.getChatMessages(message.getRoomName());
+        UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage(message.getRoomName(),RoomStateManager.getInstance().getUsername(),vectorClock,chatmessages);
+        Participant p = storage.getParticipant(message.getRoomName(),message.getSender());
+        sendMessage(p,replyMessage);
+    }
+    private void sendMessage(Participant participant, UpdateChatReplyMessage message) {
+        String[] parts = participant.ipAddress().split(":");
+        int port = Integer.parseInt(parts[1]);
+        try (Socket socket = new Socket(parts[0], port);
+             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+            out.writeObject(message);
+            out.flush();
+        } catch (IOException e) {
+            System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
+            //TODO : consider the fact that this specific user must be notified when reconnecting
+            e.printStackTrace();
         }
     }
 }

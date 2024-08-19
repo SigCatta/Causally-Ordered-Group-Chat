@@ -66,6 +66,16 @@ public class StableStorage {
         return sr.getParticipants(roomId);
     }
 
+    public Participant getParticipant(String roomId, String username){
+        List<Participant> participants = getParticipants(roomId);
+        for (Participant p : participants){
+            if (p.name().equals(username)){
+                return p;
+            }
+        }
+        return null;
+    }
+
     // Updates a participant's ip address
     public void updateParticipantIp(String roomId, Participant participant) {
         StringBuilder sb = new StringBuilder();
@@ -253,5 +263,9 @@ public class StableStorage {
             if(!m.text().equals("Chat room created successfully"))
             {System.out.println(m.text());}
         }
+    }
+    public List<Message> getChatMessages(String roomName){
+        List<Message> messages = sr.getMessages(roomName);
+        return messages;
     }
 }

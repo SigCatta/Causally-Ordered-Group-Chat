@@ -1,13 +1,22 @@
 package it.polimi;
 
+import it.polimi.Entities.Participant;
+import it.polimi.Entities.VectorClock;
 import it.polimi.Message.Message;
+import it.polimi.Message.NewRoomMessage;
+import it.polimi.Message.UpdateChatRequestMessage;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.ReplicationManager;
+import it.polimi.Storage.StableStorage;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler implements Runnable {
     private volatile Socket clientSocket;
@@ -56,6 +65,7 @@ public class ClientHandler implements Runnable {
                 setupStreams();
                 System.out.println("Reconnected to server");
                 state.setConnected(true);
+                update_chats();
                 run(); // Restart handling messages once reconnected
                 break;
             } catch (IOException e) {
@@ -66,6 +76,37 @@ public class ClientHandler implements Runnable {
                     Thread.currentThread().interrupt(); // Restore interrupt status
                 }
             }
+        }
+    }
+
+    public void update_chats(){
+        StableStorage storage = new StableStorage();
+        List<String> rooms = storage.getRoomNames();
+        for(String room : rooms){
+            List<Participant> participants = storage.getParticipants(room);
+            VectorClock vc = storage.getCurrentVectorClock(room);
+            List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
+            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room,state.getUsername(),vc,unsentMessages);
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            for (Participant participant : participants) {
+                executor.submit(() -> {
+                    if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
+                        sendMessage(participant, message);
+                    }});}
+        }
+    }
+
+    private void sendMessage(Participant participant, UpdateChatRequestMessage message) {
+        String[] parts = participant.ipAddress().split(":");
+        int port = Integer.parseInt(parts[1]);
+        try (Socket socket = new Socket(parts[0], port);
+             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+            out.writeObject(message);
+            out.flush();
+        } catch (IOException e) {
+            System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
+            //TODO : consider the fact that this specific user must be notified when reconnecting
+            e.printStackTrace();
         }
     }
 

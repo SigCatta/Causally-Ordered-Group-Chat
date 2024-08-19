@@ -1,13 +1,11 @@
 package it.polimi.States;
 
-import it.polimi.Message.ChatMessage;
-import it.polimi.Message.DeleteMessage;
-import it.polimi.Message.HelloMessage;
-import it.polimi.Message.NewRoomMessage;
+import it.polimi.Message.*;
 
 public interface RoomState{
     void handle(HelloMessage helloMessage);
     void handle(NewRoomMessage message);
     void handle(DeleteMessage message);
     void handle(ChatMessage message);
+    void handle(UpdateChatRequestMessage message);
 }
