@@ -4,11 +4,13 @@ import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.*;
+import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HomeState implements RoomState{
@@ -49,27 +51,46 @@ public class HomeState implements RoomState{
         }else{
             storage.delayMessage(message.getRoomName(),message.getMessage());
         }
+        storage.deliverDelayedMessages(message.getRoomName());
     }
 
     @Override
     public void handle(UpdateChatRequestMessage message) {
         StableStorage storage = new StableStorage();
-        VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
         // getting unsent messages from the user just connected
-        for(it.polimi.Entities.Message msg : message.getUnsentMessages()){
-            if(msg.vectorClock().canBeDeliveredAfter(vectorClock)){
-                storage.deliverMessage(message.getRoomName(),msg);
-                msg.vectorClock().merge(vectorClock);
-            }else{
-                storage.delayMessage(message.getRoomName(),msg);
-                msg.vectorClock().merge(vectorClock);
+        for (it.polimi.Entities.Message msg : message.getUnsentMessages()) {
+            VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
+            if (msg.vectorClock().canBeDeliveredAfter(vectorClock)) {
+                storage.deliverMessage(message.getRoomName(), msg);
+            } else {
+                storage.delayMessage(message.getRoomName(), msg);
             }
         }
+        storage.deliverDelayedMessages(message.getRoomName());
         // sending its vector clock and the chat messages
-        List<Message> chatmessages = storage.getChatMessages(message.getRoomName());
-        UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage(message.getRoomName(),RoomStateManager.getInstance().getUsername(),vectorClock,chatmessages);
-        Participant p = storage.getParticipant(message.getRoomName(),message.getSender());
+        List<it.polimi.Entities.Message> chatmessages = storage.getChatMessages(message.getRoomName());
+        UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage
+                (message.getRoomName(), RoomStateManager.getInstance().getUsername(), storage.getCurrentVectorClock(message.getRoomName()), chatmessages);
+        Participant p = storage.getParticipant(message.getRoomName(), message.getSender());
         replyMessage.sendMessage(p);
     }
 
+    @Override
+    public void handle(NewRoomNodeMessage message){
+        List<String> usernames = usernames(message.getParticipants());
+        ReplicationManager.getInstance().addRoom(message.getRoomName(),usernames);
+    }
+
+    @Override
+    public void handle(DeleteMessageNode message) {
+        ReplicationManager.getInstance().deleteRoom(message.getRoomName());
+    }
+
+    public List<String> usernames(List<Participant> participants){
+        List<String> u = new ArrayList<>();
+        for(Participant participant: participants){
+            u.add(participant.index(),participant.name());
+        }
+        return u;
+    }
 }

@@ -3,11 +3,13 @@ package it.polimi.States;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.*;
+import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 public class InRoomState implements RoomState {
@@ -20,6 +22,14 @@ public class InRoomState implements RoomState {
         return instance;
     }
 
+    public boolean containsName(List<Participant> p, String name){
+        for(Participant participant : p){
+            if(participant.name().equals(name)){
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     public void handle(HelloMessage helloMessage) {
         System.out.println(helloMessage.getContent() + " in room state");
@@ -27,9 +37,9 @@ public class InRoomState implements RoomState {
 
     @Override
     public void handle(NewRoomMessage message) {
-        System.out.println("NOTIFICATION : " + message.getContent());
-        StableStorage storage = new StableStorage();
-        storage.initNewRoom(message.getRoomName(), message.getParticipants());
+            System.out.println("NOTIFICATION : " + message.getContent());
+            StableStorage storage = new StableStorage();
+            storage.initNewRoom(message.getRoomName(), message.getParticipants());
     }
 
     @Override
@@ -46,7 +56,6 @@ public class InRoomState implements RoomState {
         VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
         if (message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)) {
             storage.deliverMessage(message.getRoomName(), message.getMessage());
-            message.getMessage().vectorClock().merge(vectorClock);
             if (RoomStateManager.getInstance().getRoomName().equals(message.getRoomName())) {
                 System.out.println(message.getMessage().text());
             } else {
@@ -54,8 +63,8 @@ public class InRoomState implements RoomState {
             }
         } else {
             storage.delayMessage(message.getRoomName(), message.getMessage());
-            message.getMessage().vectorClock().merge(vectorClock);
         }
+        storage.deliverDelayedMessages(message.getRoomName());
     }
 
     @Override
@@ -80,6 +89,24 @@ public class InRoomState implements RoomState {
                 (message.getRoomName(), RoomStateManager.getInstance().getUsername(), storage.getCurrentVectorClock(message.getRoomName()), chatmessages);
         Participant p = storage.getParticipant(message.getRoomName(), message.getSender());
         replyMessage.sendMessage(p);
+    }
+    @Override
+    public void handle(NewRoomNodeMessage message){
+        List<String> usernames = usernames(message.getParticipants());
+        ReplicationManager.getInstance().addRoom(message.getRoomName(),usernames);
+    }
+
+    @Override
+    public void handle(DeleteMessageNode message) {
+        ReplicationManager.getInstance().deleteRoom(message.getRoomName());
+    }
+
+    public List<String> usernames(List<Participant> participants){
+        List<String> u = new ArrayList<>();
+        for(Participant participant: participants){
+            u.add(participant.index(),participant.name());
+        }
+        return u;
     }
 
 }

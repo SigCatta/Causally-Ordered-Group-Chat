@@ -3,9 +3,12 @@ package it.polimi.CommandExecutors.Specific;
 import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Participant;
 import it.polimi.Message.DeleteMessage;
+import it.polimi.Message.DeleteMessageNode;
+import it.polimi.Message.NewRoomNodeMessage;
 import it.polimi.States.HomeState;
 import it.polimi.States.InRoomState;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
 import java.io.IOException;
@@ -20,6 +23,7 @@ public class DeleteRoomCE implements CommandExecutor {
     public void execute() {
         if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
             String roomName = RoomStateManager.getInstance().getRoomName();
+            int x = roomName.charAt(0)-97;
             StableStorage storage = new StableStorage();
             DeleteMessage message = new DeleteMessage(roomName);
             List<Participant> participants = storage.getParticipants(roomName);
@@ -33,6 +37,10 @@ public class DeleteRoomCE implements CommandExecutor {
                     }});
             }
             executor.close();
+            String[] roomNodes = ReplicationManager.getInstance().getRoomNodes();
+            String address = roomNodes[x];
+            DeleteMessageNode m = new DeleteMessageNode(roomName);
+            m.sendMessage(new Participant(0,"x",address));
         }
     }
 }
