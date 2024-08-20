@@ -1,9 +1,6 @@
 package it.polimi.Storage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -11,7 +8,7 @@ public class ReplicationManager {
     private static ReplicationManager instance;
     private final ConcurrentHashMap<String, String> usersMap;
     private final ConcurrentHashMap<String, List<String>> roomsMap;
-    private final List<String> deletedRoomsList;
+    private final Set<String> deletedRoomsList;
 
     private final List<String> roomNodes;
     private final List<String> userNodes;
@@ -19,7 +16,7 @@ public class ReplicationManager {
     private ReplicationManager() {
         this.usersMap = new ConcurrentHashMap<>();
         this.roomsMap = new ConcurrentHashMap<>();
-        this.deletedRoomsList = new ArrayList<>();
+        this.deletedRoomsList = new HashSet<>();
 
         this.roomNodes = new ArrayList<>(26);
         this.userNodes = new ArrayList<>(26);
@@ -32,7 +29,7 @@ public class ReplicationManager {
         return instance;
     }
 
-    public List<String> getDeletedRoomsList() {
+    public Set<String> getDeletedRooms() {
         return deletedRoomsList;
     }
 

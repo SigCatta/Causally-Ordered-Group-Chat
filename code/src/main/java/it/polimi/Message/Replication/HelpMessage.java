@@ -50,8 +50,10 @@ public class HelpMessage extends Message implements Serializable {
                         });
 
                 // send the new map to the candidate node
+
                 try {
-                    new RoomNodeProposalMessage(mapToSend).sendMessage(new Participant(0, "-", ip + ':' + port));
+                    new RoomNodeProposalMessage(mapToSend, ReplicationManager.getInstance().getDeletedRooms())
+                            .sendMessage(new Participant(0, "-", ip + ':' + port));
                 } catch (Exception e) {
                     System.out.println("Error sending RoomNodeProposalMessage, ignoring help message...");
                     return;
@@ -65,9 +67,7 @@ public class HelpMessage extends Message implements Serializable {
                 Message message = new UpdateRingsMessage(roomNodesArr, null);
                 Arrays.stream(roomNodesArr)
                         .distinct()
-                        .forEach(ip -> {
-                                message.sendMessage(new Participant(0, "-", ip));
-                        });
+                        .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));
 
                 // remove the first half of the letters from my map ~ this is done at the very end to prevent losing data
                 mapToSend.keySet().forEach(
@@ -112,9 +112,7 @@ public class HelpMessage extends Message implements Serializable {
                 Message message = new UpdateRingsMessage(null, userNodesArr);
                 Arrays.stream(userNodesArr)
                         .distinct()
-                        .forEach(ip -> {
-                                message.sendMessage(new Participant(0, "-", ip));
-                        });
+                        .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));
 
                 // remove the first half of the letters from my map ~ this is done at the very end to prevent losing data
                 mapToSend.keySet().forEach(
