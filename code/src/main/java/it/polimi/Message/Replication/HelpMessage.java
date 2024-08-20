@@ -1,10 +1,13 @@
-package it.polimi.Message;
+package it.polimi.Message.Replication;
 
+import it.polimi.Entities.Participant;
+import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,19 +51,23 @@ public class HelpMessage extends Message implements Serializable {
 
                 // send the new map to the candidate node
                 try {
-                    new RoomNodeProposalMessage(mapToSend).send();
+                    new RoomNodeProposalMessage(mapToSend).sendMessage(new Participant(0, "-", ip + ':' + port));
                 } catch (Exception e) {
                     System.out.println("Error sending RoomNodeProposalMessage, ignoring help message...");
                     return;
                 }
 
                 // tell other ring nodes about the change
-                String[] roomNodesArr = new String[26];
+                String[] roomNodesArr = ReplicationManager.getInstance().getRoomNodes().toArray(new String[26]);
                 for (int i = roomNodes.indexOf(myEntry); i < roomNodes.indexOf(myEntry) + count / 2; i++) {
                     roomNodesArr[i] = ip + ':' + port;
                 }
-                new UpdateRingsMessage(roomNodesArr, null).send();
-
+                Message message = new UpdateRingsMessage(roomNodesArr, null);
+                Arrays.stream(roomNodesArr)
+                        .distinct()
+                        .forEach(ip -> {
+                                message.sendMessage(new Participant(0, "-", ip));
+                        });
 
                 // remove the first half of the letters from my map ~ this is done at the very end to prevent losing data
                 mapToSend.keySet().forEach(
@@ -91,18 +98,23 @@ public class HelpMessage extends Message implements Serializable {
 
                 // send the new map to the candidate node
                 try {
-                    new UserNodeProposalMessage(mapToSend).send();
+                    new UserNodeProposalMessage(mapToSend).sendMessage(new Participant(0, "-", ip + ':' + port));
                 } catch (Exception e) {
                     System.out.println("Error sending UserNodeProposalMessage, ignoring help message...");
                     return;
                 }
 
                 // tell other ring nodes about the change
-                String[] userNodesArr = new String[26];
+                String[] userNodesArr = ReplicationManager.getInstance().getRoomNodes().toArray(new String[26]);
                 for (int i = userNodes.indexOf(myEntry); i < userNodes.indexOf(myEntry) + count / 2; i++) {
                     userNodesArr[i] = ip + ':' + port;
                 }
-                new UpdateRingsMessage(null, userNodesArr).send();
+                Message message = new UpdateRingsMessage(null, userNodesArr);
+                Arrays.stream(userNodesArr)
+                        .distinct()
+                        .forEach(ip -> {
+                                message.sendMessage(new Participant(0, "-", ip));
+                        });
 
                 // remove the first half of the letters from my map ~ this is done at the very end to prevent losing data
                 mapToSend.keySet().forEach(

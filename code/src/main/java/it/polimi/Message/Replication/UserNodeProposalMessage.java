@@ -1,5 +1,6 @@
-package it.polimi.Message;
+package it.polimi.Message.Replication;
 
+import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.ReplicationManager;
 

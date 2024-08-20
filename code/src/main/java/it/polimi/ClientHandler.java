@@ -3,10 +3,8 @@ package it.polimi;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.Message;
-import it.polimi.Message.NewRoomMessage;
 import it.polimi.Message.UpdateChatRequestMessage;
 import it.polimi.States.RoomStateManager;
-import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
 import java.io.EOFException;
@@ -123,7 +121,11 @@ public class ClientHandler implements Runnable {
                 message.process(state.getCurrentState());
             }
         } catch (Exception e) {
-            disconnect();
+            if (e instanceof EOFException) disconnect();
+            else {
+                e.printStackTrace();
+                disconnect();
+            }
         }
     }
 }

@@ -1,7 +1,10 @@
 package it.polimi;
 
 import it.polimi.CommandExecutors.CommandExecutorFactory;
+import it.polimi.Entities.Participant;
+import it.polimi.Message.Replication.HelpMessage;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.ReplicationManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -29,20 +32,31 @@ public class Main {
         System.out.println("Do you want to create a new network? (y/n)");
         String choice = scanner.next();
         if (choice.equals("n")) {
+            for (int i = 0; i < 26; i++) {
+                ReplicationManager.getInstance().getRoomNodes().add(null);
+                ReplicationManager.getInstance().getUserNodes().add(null);
+            }
             System.out.println("Insert IP of a member:");
             String memberIp = scanner.next();
 
             System.out.println("Insert port of a member:");
             int memberPort = scanner.nextInt();
-            reconnectionToList(memberIp, memberPort);
+
+            new Thread(() -> startListening(ip, port, username)).start();
+            new HelpMessage(true, true).sendMessage(new Participant(0, "-", memberIp + ':' + memberPort));
         } else if (!choice.equals("y")) {
             throw new RuntimeException("Invalid choice");
         } else {
+            String entry = ip + ':' + port;
+            for (int i = 0; i < 26; i++) {
+                ReplicationManager.getInstance().getRoomNodes().add(entry);
+                ReplicationManager.getInstance().getUserNodes().add(entry);
+            }
             System.out.println("Network created!");
+            new Thread(() -> startListening(ip, port, username)).start();
         }
 
         // Start the server thread
-        new Thread(() -> startListening(ip, port, username)).start();
 
         readLine();
     }
@@ -84,10 +98,5 @@ public class Main {
         }
 
         scanner.close();
-    }
-
-    public static void reconnectionToList(String ip, Integer port) {
-        // sending information for the first time
-        // getting info about who has already joined
     }
 }
