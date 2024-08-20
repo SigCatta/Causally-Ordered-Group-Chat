@@ -26,12 +26,12 @@ public class Main {
         state.setPort(port);
         state.setUsername(username);
 
-    /*    System.out.println("Insert IP of a member:");
+        System.out.println("Insert IP of a member:");
         String memberIp = scanner.next();
 
         System.out.println("Insert port of a member:");
         int memberPort = scanner.nextInt();
-        reconnectionToList(memberIp, memberPort);*/
+        reconnectionToList(memberIp, memberPort);
 
         // Start the server thread
         new Thread(() -> startListening(ip, port, username)).start();
