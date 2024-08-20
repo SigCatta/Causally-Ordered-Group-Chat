@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class ReplicationManagerTest {
     @Test
     public void test() {
-        ReplicationManager replicationManager = new ReplicationManager();
+        ReplicationManager replicationManager = ReplicationManager.getInstance();
         replicationManager.becomeRoomsNode(new ArrayList<>(), new ConcurrentHashMap<>());
 
         replicationManager.addRoom("roomId", List.of("u1", "u2"));
@@ -23,5 +23,24 @@ public class ReplicationManagerTest {
         assertTrue(replicationManager.getDeletedRooms(new ArrayList<>()).contains("roomId"));
 
         assertNull(replicationManager.getParticipants("roomId"));
+    }
+
+    @Test
+    public void choiceTest() {
+        ReplicationManager replicationManager = ReplicationManager.getInstance();
+
+        String[] arr = new String[26];
+
+        arr[1] = "node1";
+        arr[2] = "node2";
+        arr[3] = "node1";
+
+        replicationManager.setRoomNodes(arr);
+        replicationManager.setUserNodes(arr);
+
+        assertEquals("node1", replicationManager.getRoomNodes()[1]);
+        assertEquals("node1", replicationManager.chooseRoomNodeToHelp());
+        assertEquals("node1", replicationManager.getUserNodes()[1]);
+        assertEquals("node1", replicationManager.chooseUserNodeToHelp());
     }
 }

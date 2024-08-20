@@ -248,6 +248,7 @@ public class StableStorage {
         return sr.getDirectoriesUnderPath();
     }
 
+    // Returns the index of a given user in the given chat room
     public int getIndex(String roomName, String username){
         List<Participant> participants = getParticipants(roomName);
         for (Participant p : participants){
@@ -257,12 +258,13 @@ public class StableStorage {
         }
         return -1;
     }
+
+    // Prints all messages in a chat room
     public void getChat(String roomName){
-        List<Message> messages = sr.getMessages(roomName);
-        for (Message m : messages){
-            if(!m.text().equals("Chat room created successfully"))
-            {System.out.println(m.text());}
-        }
+        sr.getMessages(roomName)
+                .subList(1, sr.getMessages(roomName).size()) // we don't need to print the first message
+                .stream().map(Message::text)
+                .forEach(System.out::println);
     }
     public List<Message> getChatMessages(String roomName){
         List<Message> messages = sr.getMessages(roomName);

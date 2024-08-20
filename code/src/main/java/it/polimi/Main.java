@@ -26,17 +26,25 @@ public class Main {
         state.setPort(port);
         state.setUsername(username);
 
-        System.out.println("Insert IP of a member:");
-        String memberIp = scanner.next();
+        System.out.println("Do you want to create a new network? (y/n)");
+        String choice = scanner.next();
+        if (choice.equals("n")) {
+            System.out.println("Insert IP of a member:");
+            String memberIp = scanner.next();
 
-        System.out.println("Insert port of a member:");
-        int memberPort = scanner.nextInt();
-        reconnectionToList(memberIp, memberPort);
+            System.out.println("Insert port of a member:");
+            int memberPort = scanner.nextInt();
+            reconnectionToList(memberIp, memberPort);
+        } else if (!choice.equals("y")) {
+            throw new RuntimeException("Invalid choice");
+        } else {
+            System.out.println("Network created!");
+        }
 
         // Start the server thread
         new Thread(() -> startListening(ip, port, username)).start();
 
-       readLine();
+        readLine();
     }
 
     public static void startListening(String ip, int port, String username) {
@@ -78,7 +86,7 @@ public class Main {
         scanner.close();
     }
 
-    public static void reconnectionToList(String ip,Integer port){
+    public static void reconnectionToList(String ip, Integer port) {
         // sending information for the first time
         // getting info about who has already joined
     }
