@@ -79,36 +79,26 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void update_chats(){
+    public void update_chats() {
         StableStorage storage = new StableStorage();
         List<String> rooms = storage.getRoomNames();
-        for(String room : rooms){
+        for (String room : rooms) {
             List<Participant> participants = storage.getParticipants(room);
             VectorClock vc = storage.getCurrentVectorClock(room);
             List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
-            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room,state.getUsername(),vc,unsentMessages);
+            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, state.getUsername(), vc, unsentMessages);
             ExecutorService executor = Executors.newFixedThreadPool(10);
             for (Participant participant : participants) {
                 executor.submit(() -> {
-                    if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
-                        sendMessage(participant, message);
-                    }});}
+                    if (!participant.name().equals(RoomStateManager.getInstance().getUsername())) {
+                        message.sendMessage(participant);
+                    }
+                });
+            }
+            executor.close();
         }
     }
 
-    private void sendMessage(Participant participant, UpdateChatRequestMessage message) {
-        String[] parts = participant.ipAddress().split(":");
-        int port = Integer.parseInt(parts[1]);
-        try (Socket socket = new Socket(parts[0], port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
-            //TODO : consider the fact that this specific user must be notified when reconnecting
-            e.printStackTrace();
-        }
-    }
 
     private void disconnect() {
         try {
@@ -132,8 +122,7 @@ public class ClientHandler implements Runnable {
                 Message message = (Message) input.readObject();
                 message.process(state.getCurrentState());
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             disconnect();
         }
     }

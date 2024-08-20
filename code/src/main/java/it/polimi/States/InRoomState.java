@@ -10,29 +10,31 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
 
-public class InRoomState implements RoomState{
+public class InRoomState implements RoomState {
     private static InRoomState instance;
+
     public static InRoomState getInstance() {
         if (instance == null) {
             instance = new InRoomState();
         }
         return instance;
     }
+
     @Override
     public void handle(HelloMessage helloMessage) {
-        System.out.println(helloMessage.getContent()+" in room state");
+        System.out.println(helloMessage.getContent() + " in room state");
     }
 
     @Override
     public void handle(NewRoomMessage message) {
-        System.out.println("NOTIFICATION : "+message.getContent());
+        System.out.println("NOTIFICATION : " + message.getContent());
         StableStorage storage = new StableStorage();
         storage.initNewRoom(message.getRoomName(), message.getParticipants());
     }
 
     @Override
     public void handle(DeleteMessage message) {
-        System.out.println("NOTIFICATION : "+message.getContent());
+        System.out.println("NOTIFICATION : " + message.getContent());
         StableStorage storage = new StableStorage();
         storage.delete(message.getRoomName());
         RoomStateManager.getInstance().setCurrentState(HomeState.getInstance());
@@ -42,50 +44,42 @@ public class InRoomState implements RoomState{
     public void handle(ChatMessage message) {
         StableStorage storage = new StableStorage();
         VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
-        if(message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)){
-            storage.deliverMessage(message.getRoomName(),message.getMessage());
+        if (message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)) {
+            storage.deliverMessage(message.getRoomName(), message.getMessage());
             message.getMessage().vectorClock().merge(vectorClock);
-            if(RoomStateManager.getInstance().getRoomName().equals(message.getRoomName())) {
+            if (RoomStateManager.getInstance().getRoomName().equals(message.getRoomName())) {
                 System.out.println(message.getMessage().text());
-            }else{ System.out.println("NOTIFICATION : "+message.getContent());}
-        }else{
-            storage.delayMessage(message.getRoomName(),message.getMessage());
+            } else {
+                System.out.println("NOTIFICATION : " + message.getContent());
+            }
+        } else {
+            storage.delayMessage(message.getRoomName(), message.getMessage());
             message.getMessage().vectorClock().merge(vectorClock);
         }
     }
+
     @Override
     public void handle(UpdateChatRequestMessage message) {
         StableStorage storage = new StableStorage();
-        VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
         // getting unsent messages from the user just connected
-        for(it.polimi.Entities.Message msg : message.getUnsentMessages()){
-            if(msg.vectorClock().canBeDeliveredAfter(vectorClock)){
-                storage.deliverMessage(message.getRoomName(),msg);
-                msg.vectorClock().merge(vectorClock);
-                if(RoomStateManager.getInstance().getRoomName().equals(message.getRoomName()))
-                {System.out.println(msg.text());}
-            }else{
-                storage.delayMessage(message.getRoomName(),msg);
-                msg.vectorClock().merge(vectorClock);
+        for (it.polimi.Entities.Message msg : message.getUnsentMessages()) {
+            VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
+            if (msg.vectorClock().canBeDeliveredAfter(vectorClock)) {
+                storage.deliverMessage(message.getRoomName(), msg);
+                if (RoomStateManager.getInstance().getRoomName().equals(message.getRoomName())) {
+                    System.out.println(msg.text());
+                }
+            } else {
+                storage.delayMessage(message.getRoomName(), msg);
             }
         }
+        storage.deliverDelayedMessages(message.getRoomName());
         // sending its vector clock and the chat messages
         List<it.polimi.Entities.Message> chatmessages = storage.getChatMessages(message.getRoomName());
-        UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage(message.getRoomName(),RoomStateManager.getInstance().getUsername(),vectorClock,chatmessages);
-        Participant p = storage.getParticipant(message.getRoomName(),message.getSender());
-        sendMessage(p,replyMessage);
+        UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage
+                (message.getRoomName(), RoomStateManager.getInstance().getUsername(), storage.getCurrentVectorClock(message.getRoomName()), chatmessages);
+        Participant p = storage.getParticipant(message.getRoomName(), message.getSender());
+        replyMessage.sendMessage(p);
     }
-    private void sendMessage(Participant participant, UpdateChatReplyMessage message) {
-        String[] parts = participant.ipAddress().split(":");
-        int port = Integer.parseInt(parts[1]);
-        try (Socket socket = new Socket(parts[0], port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
-            //TODO : consider the fact that this specific user must be notified when reconnecting
-            e.printStackTrace();
-        }
-    }
+
 }

@@ -21,19 +21,7 @@ public class InvalidCE implements CommandExecutor {
     public InvalidCE(String command) {
         this.command = command;
     }
-    private void sendMessage(Participant participant, ChatMessage message, Message m) {
-        String[] parts = participant.ipAddress().split(":");
-        int port = Integer.parseInt(parts[1]);
-        try (Socket socket = new Socket(parts[0], port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            //TODO : not in unsent but in undelivered or something similar
-            StableStorage storage = new StableStorage();
-            storage.storeUnsentMessage(RoomStateManager.getInstance().getRoomName(),m);
-        }
-    }
+
     @Override
     public void execute() {
         if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
@@ -49,7 +37,7 @@ public class InvalidCE implements CommandExecutor {
                 List<Participant> participants = storage.getParticipants(RoomStateManager.getInstance().getRoomName());
                 for (Participant participant : participants) {
                     if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
-                        sendMessage(participant, chatMessage,m);}
+                        chatMessage.sendMessage(participant);}
                 }
             }else{
                 storage.storeUnsentMessage(RoomStateManager.getInstance().getRoomName(),m);

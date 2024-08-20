@@ -69,19 +69,7 @@ public class HomeState implements RoomState{
         List<Message> chatmessages = storage.getChatMessages(message.getRoomName());
         UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage(message.getRoomName(),RoomStateManager.getInstance().getUsername(),vectorClock,chatmessages);
         Participant p = storage.getParticipant(message.getRoomName(),message.getSender());
-        sendMessage(p,replyMessage);
+        replyMessage.sendMessage(p);
     }
-    private void sendMessage(Participant participant, UpdateChatReplyMessage message) {
-        String[] parts = participant.ipAddress().split(":");
-        int port = Integer.parseInt(parts[1]);
-        try (Socket socket = new Socket(parts[0], port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
-            //TODO : consider the fact that this specific user must be notified when reconnecting
-            e.printStackTrace();
-        }
-    }
+
 }

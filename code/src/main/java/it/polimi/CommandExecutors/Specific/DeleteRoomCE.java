@@ -16,19 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DeleteRoomCE implements CommandExecutor {
-    private void sendRoomCreationMessage(Participant participant, DeleteMessage message) {
-        String[] parts = participant.ipAddress().split(":");
-        int port = Integer.parseInt(parts[1]);
-        try (Socket socket = new Socket(parts[0], port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(message);
-            out.flush();
-        } catch (IOException e) {
-            System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
-            //TODO : consider the fact that this specific user must be notified when reconnecting
-            e.printStackTrace();
-        }
-    }
     @Override
     public void execute() {
         if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
@@ -42,9 +29,10 @@ public class DeleteRoomCE implements CommandExecutor {
             for (Participant participant : participants) {
                 executor.submit(() -> {
                     if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
-                        sendRoomCreationMessage(participant, message);
+                        message.sendMessage(participant);
                     }});
             }
+            executor.close();
         }
     }
 }
