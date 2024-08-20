@@ -29,18 +29,18 @@ public class ReplicationManagerTest {
     public void choiceTest() {
         ReplicationManager replicationManager = ReplicationManager.getInstance();
 
-        String[] arr = new String[26];
+        List<String> arr = new ArrayList<>(26);
 
-        arr[1] = "node1";
-        arr[2] = "node2";
-        arr[3] = "node1";
+        arr.add( "node1");
+        arr.add( "node1");
+        arr.add( "node1");
 
         replicationManager.setRoomNodes(arr);
         replicationManager.setUserNodes(arr);
 
-        assertEquals("node1", replicationManager.getRoomNodes()[1]);
+        assertEquals("node1", replicationManager.getRoomNodes().get(1));
         assertEquals("node1", replicationManager.chooseRoomNodeToHelp());
-        assertEquals("node1", replicationManager.getUserNodes()[1]);
+        assertEquals("node1", replicationManager.getUserNodes().get(1));
         assertEquals("node1", replicationManager.chooseUserNodeToHelp());
     }
 }

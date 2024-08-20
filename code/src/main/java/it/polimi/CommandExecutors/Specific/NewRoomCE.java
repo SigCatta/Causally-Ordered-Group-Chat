@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 public class NewRoomCE implements CommandExecutor {
     @Override
     public void execute() {
-        if(RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance()){
+        if (RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance()) {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Insert the name of the room: ");
             String roomName = scanner.nextLine();
@@ -29,7 +29,7 @@ public class NewRoomCE implements CommandExecutor {
             System.out.println("Insert number of users to add (except you): ");
             Integer numberOfUsers = scanner.nextInt();
             List<Participant> participants = new ArrayList<>();
-            for(int i = 0; i < numberOfUsers; i++){
+            for (int i = 0; i < numberOfUsers; i++) {
                 System.out.println("Insert the name of the user: ");
                 String userName = scanner.next();
                 System.out.println("Insert the IP address of the user: ");
@@ -37,7 +37,7 @@ public class NewRoomCE implements CommandExecutor {
                 System.out.println("Insert the port of the user: ");
                 Integer userPort = scanner.nextInt();
                 scanner.nextLine();
-                userIP = userIP+":"+userPort;
+                userIP = userIP + ":" + userPort;
                 participants.add(new Participant(i, userName, userIP));
             }
             participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort()));
@@ -52,7 +52,7 @@ public class NewRoomCE implements CommandExecutor {
                 message.sendMessage(participant);
             }});}
             executor.close();
-            String[] roomNodes = ReplicationManager.getInstance().getRoomNodes();
+            String[] roomNodes = ReplicationManager.getInstance().getRoomNodes().toArray(new String[26]);
             String address = roomNodes[x];
             NewRoomNodeMessage m = new NewRoomNodeMessage(roomName,participants);
             m.sendMessage(new Participant(0,"x",address));

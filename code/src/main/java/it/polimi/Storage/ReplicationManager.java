@@ -6,20 +6,20 @@ import java.util.stream.Collectors;
 
 public class ReplicationManager {
     private static ReplicationManager instance;
-    private final ConcurrentHashMap<String, String> usernamesMap;
+    private final ConcurrentHashMap<String, String> usersMap;
     private final ConcurrentHashMap<String, List<String>> roomsMap;
     private final List<String> deletedRoomsList;
 
-    private final String[] roomNodes;
-    private final String[] userNodes;
+    private final List<String> roomNodes;
+    private final List<String> userNodes;
 
     private ReplicationManager() {
-        this.usernamesMap = new ConcurrentHashMap<>();
+        this.usersMap = new ConcurrentHashMap<>();
         this.roomsMap = new ConcurrentHashMap<>();
         this.deletedRoomsList = new ArrayList<>();
 
-        this.roomNodes = new String[26];
-        this.userNodes = new String[26];
+        this.roomNodes = new ArrayList<>(26);
+        this.userNodes = new ArrayList<>(26);
     }
 
     public static ReplicationManager getInstance() {
@@ -37,32 +37,34 @@ public class ReplicationManager {
         return roomsMap;
     }
 
-    public ConcurrentHashMap<String, String> getUsernamesMap() {
-        return usernamesMap;
+    public ConcurrentHashMap<String, String> getUsersMap() {
+        return usersMap;
     }
 
-    public String[] getRoomNodes() {
+    public List<String> getRoomNodes() {
         return roomNodes;
     }
 
-    public String[] getUserNodes() {
+    public List<String> getUserNodes() {
         return userNodes;
     }
 
     public void updateRoomNode(String node, int index) {
-        roomNodes[index] = node;
+        roomNodes.set(index, node);
     }
 
     public void updateUserNode(String node, int index) {
-        userNodes[index] = node;
+        userNodes.set(index, node);
     }
 
-    public void setRoomNodes(String[] roomNodes) {
-        System.arraycopy(roomNodes, 0, this.roomNodes, 0, roomNodes.length);
+    public void setRoomNodes(List<String> roomNodes) {
+        this.roomNodes.clear();
+        this.roomNodes.addAll(roomNodes);
     }
 
-    public void setUserNodes(String[] userNodes) {
-        System.arraycopy(userNodes, 0, this.userNodes, 0, userNodes.length);
+    public void setUserNodes(List<String> userNodes) {
+        this.userNodes.clear();
+        this.userNodes.addAll(userNodes);
     }
 
     //
@@ -71,7 +73,7 @@ public class ReplicationManager {
 
     // Returns the node that is handling the most rooms
     public String chooseRoomNodeToHelp() {
-        return Arrays.stream(roomNodes)
+        return roomNodes.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(node -> node, Collectors.summingInt(node -> 1)))
                 .entrySet().stream()
@@ -122,7 +124,7 @@ public class ReplicationManager {
 
     // Returns the node that is handling the most usernames
     public String chooseUserNodeToHelp() {
-        return Arrays.stream(userNodes)
+        return userNodes.stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(node -> node, Collectors.summingInt(node -> 1)))
                 .entrySet().stream()
@@ -133,11 +135,11 @@ public class ReplicationManager {
 
     // Adds a user or updates its ip address
     public void addUser(String username, String ipAddress) {
-        usernamesMap.put(username, ipAddress);
+        usersMap.put(username, ipAddress);
     }
 
     // Returns the ip address of a user
     public String getIpAddress(String username) {
-        return usernamesMap.get(username);
+        return usersMap.get(username);
     }
 }
