@@ -6,6 +6,7 @@ import it.polimi.Message.Replication.HelpMessage;
 import it.polimi.Message.Replication.RingDataRequestMessage;
 import it.polimi.Message.RoomNodes.CheckForDeletionMessage;
 import it.polimi.Message.RoomNodes.GetMyRoomsMessage;
+import it.polimi.Message.UserNodes.JoinMessage;
 import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
@@ -56,6 +57,7 @@ public class Main {
                 ReplicationManager.getInstance().getRoomNodes().add(entry);
                 ReplicationManager.getInstance().getUserNodes().add(entry);
             }
+            ReplicationManager.getInstance().addUser(state.getUsername(), state.getIp() + ':' + state.getPort());
             System.out.println("Network created!");
         }
 
@@ -126,6 +128,9 @@ public class Main {
         }
 
         // TODO: If I experienced a catastrophic failure, I communicated the affected data to the responsible node
+
+        new JoinMessage(state.getUsername(), myEndpoint)
+                .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(state.getUsername().charAt(0) - 'a')));
 
         // Check if any of my rooms have been deleted
         StableStorage.getInstance().getRoomNames()
