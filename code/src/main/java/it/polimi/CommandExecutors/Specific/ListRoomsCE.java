@@ -12,7 +12,7 @@ public class ListRoomsCE implements CommandExecutor {
     @Override
     public void execute() {
         if(RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance()){
-            StableStorage storage = new StableStorage();
+            StableStorage storage = StableStorage.getInstance();
             List<String> rooms = storage.getRoomNames();
             System.out.println("Rooms available: ");
             for(String room : rooms){

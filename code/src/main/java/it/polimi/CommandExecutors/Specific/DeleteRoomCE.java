@@ -24,7 +24,7 @@ public class DeleteRoomCE implements CommandExecutor {
         if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
             String roomName = RoomStateManager.getInstance().getRoomName();
             int x = roomName.charAt(0)-97;
-            StableStorage storage = new StableStorage();
+            StableStorage storage = StableStorage.getInstance();
             DeleteMessage message = new DeleteMessage(roomName);
             List<Participant> participants = storage.getParticipants(roomName);
             storage.delete(roomName);

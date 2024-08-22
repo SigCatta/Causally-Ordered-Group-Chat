@@ -78,7 +78,7 @@ public class ClientHandler implements Runnable {
     }
 
     public void update_chats() {
-        StableStorage storage = new StableStorage();
+        StableStorage storage = StableStorage.getInstance();
         List<String> rooms = storage.getRoomNames();
         for (String room : rooms) {
             List<Participant> participants = storage.getParticipants(room);

@@ -20,7 +20,7 @@ public class StableStorageTest {
 
         String username = "username_di_prova";
         RoomStateManager.getInstance().setUsername(username);
-        StableStorage ss = new StableStorage();
+        StableStorage ss = StableStorage.getInstance();
         ss.initNewRoom("test", List.of(p1, p2, p3));
 
         ss.delayMessage("test", new Message("Message 5", new VectorClock(List.of(2, 2, 1))));
@@ -45,7 +45,7 @@ public class StableStorageTest {
 
         String username = "username_di_prova";
         RoomStateManager.getInstance().setUsername(username);
-        StableStorage ss = new StableStorage();
+        StableStorage ss = StableStorage.getInstance();
         ss.initNewRoom("test", List.of(p1, p2, p3));
 
         ss.delayMessage("test", new Message("Message 5", new VectorClock(List.of(2, 2, 1))));
@@ -71,7 +71,7 @@ public class StableStorageTest {
 
         String username = "username_di_prova";
         RoomStateManager.getInstance().setUsername(username);
-        StableStorage ss = new StableStorage();
+        StableStorage ss = StableStorage.getInstance();
         ss.initNewRoom("test", List.of(p1, p2, p3));
 
         ss.deliverMessage("test", new Message("Message 1", new VectorClock(List.of(1, 1, 1))));
