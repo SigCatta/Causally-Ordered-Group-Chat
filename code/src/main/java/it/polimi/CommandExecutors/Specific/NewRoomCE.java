@@ -10,9 +10,6 @@ import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
