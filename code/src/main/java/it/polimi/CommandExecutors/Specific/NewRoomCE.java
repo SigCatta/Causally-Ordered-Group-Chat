@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class NewRoomCE implements CommandExecutor {
     @Override
@@ -32,21 +33,23 @@ public class NewRoomCE implements CommandExecutor {
                 String userName = scanner.next();
                 participants.add(numberOfUsers,userName);
             }
-            String[] roomNodes = ReplicationManager.getInstance().getRoomNodes().toArray(new String[26]);
-            String address = roomNodes[x];
+            List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
+            AtomicReference<String> address = new AtomicReference<>(roomNodes.get(x));
             NewRoomNodeMessage m = new NewRoomNodeMessage(roomName, participants);
-            m.sendMessage(new Participant(0, "x", address));
+            m.sendMessage(new Participant(0, "x", address.get()));
             List<Participant> p = new ArrayList<>();
             String a = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
             participants.forEach( username -> {
                 GetUserAddressMessage message = new GetUserAddressMessage(username,a);
+                List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
+                String ind = userNodes.get(username.charAt(0));
                 try {
-                    String participantAddress = message.sendMessageAndGetResponse(address);
+                    String participantAddress = message.sendMessageAndGetResponse(ind);
                     Participant participant = new Participant(p.size() , username, participantAddress);
                     p.add(participant);
                 } catch (Exception e) {
-                    System.err.println("Failed to get address for user: " + username);
-                    e.printStackTrace();
+                    Participant participant = new Participant(p.size() , username, null);
+                    p.add(participant);
                 }
             });
             p.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort()));
@@ -56,12 +59,13 @@ public class NewRoomCE implements CommandExecutor {
             NewRoomMessage message = new NewRoomMessage(roomName, p);
             ExecutorService executor = Executors.newFixedThreadPool(10);
             for (Participant participant : p) {
+                if(participant.ipAddress()!= null){
                 executor.submit(() -> {
                     if (!participant.name().equals(RoomStateManager.getInstance().getUsername())) {
                         message.sendMessage(participant);
                     }
                 });
-            }
+            }}
             executor.close();
         }
 

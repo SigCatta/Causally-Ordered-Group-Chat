@@ -5,8 +5,10 @@ import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.ChatMessage;
+import it.polimi.Message.Replication.GetUserAddressMessage;
 import it.polimi.States.InRoomState;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
 import java.io.IOException;
@@ -33,11 +35,27 @@ public class InvalidCE implements CommandExecutor {
             Message m = new Message(text,updated);
             ChatMessage chatMessage = new ChatMessage(m, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getRoomName());
             storage.deliverMessage(RoomStateManager.getInstance().getRoomName(),m);
+            String a = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
             if(RoomStateManager.getInstance().getConnected()) {
                 List<Participant> participants = storage.getParticipants(RoomStateManager.getInstance().getRoomName());
                 for (Participant participant : participants) {
                     if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
-                        chatMessage.sendMessage(participant);}
+                        if(participant.ipAddress()!=null){
+                            chatMessage.sendMessage(participant);
+                        }
+                        else{
+                            GetUserAddressMessage message = new GetUserAddressMessage(participant.name(),a);
+                            List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
+                            String ind = userNodes.get(participant.name().charAt(0));
+                            try {
+                                String participantAddress = message.sendMessageAndGetResponse(ind);
+                                StableStorage.getInstance().updateParticipantIp(RoomStateManager.getInstance().getRoomName(), new Participant(participant.index(),participant.name(),participantAddress));
+                                chatMessage.sendMessage(participant);
+                            } catch (Exception e) {
+
+                            }
+                        }
+                    }
                 }
             }else{
                 storage.storeUnsentMessage(RoomStateManager.getInstance().getRoomName(),m);
