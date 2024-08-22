@@ -29,20 +29,20 @@ public class HomeState implements RoomState{
     @Override
     public void handle(NewRoomMessage message) {
         System.out.println("NOTIFICATION : "+message.getContent());
-        StableStorage storage = new StableStorage();
+        StableStorage storage = StableStorage.getInstance();
         storage.initNewRoom(message.getRoomName(), message.getParticipants());
     }
 
     @Override
     public void handle(DeleteMessage message) {
         System.out.println("NOTIFICATION : "+message.getContent());
-        StableStorage storage = new StableStorage();
+        StableStorage storage = StableStorage.getInstance();
         storage.delete(message.getRoomName());
     }
 
     @Override
     public void handle(ChatMessage message) {
-        StableStorage storage = new StableStorage();
+        StableStorage storage = StableStorage.getInstance();
         VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
         int index =storage.getIndex(message.getRoomName(),message.getSender());
         if(message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)){
@@ -56,7 +56,7 @@ public class HomeState implements RoomState{
 
     @Override
     public void handle(UpdateChatRequestMessage message) {
-        StableStorage storage = new StableStorage();
+        StableStorage storage = StableStorage.getInstance();
         // getting unsent messages from the user just connected
         for (it.polimi.Entities.Message msg : message.getUnsentMessages()) {
             VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());

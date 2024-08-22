@@ -15,7 +15,7 @@ public class ViewRoomCE implements CommandExecutor {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Which room you want to enter?");
         String roomName = scanner.nextLine();
-        StableStorage storage = new StableStorage();
+        StableStorage storage = StableStorage.getInstance();
         if(storage.doesRoomExist(roomName)){
         RoomStateManager.getInstance().setRoomName(roomName);
         RoomStateManager.getInstance().setCurrentState(InRoomState.getInstance());

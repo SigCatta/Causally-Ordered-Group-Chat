@@ -24,7 +24,7 @@ public class DeleteRoomCE implements CommandExecutor {
         if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
             String roomName = RoomStateManager.getInstance().getRoomName();
             int x = roomName.charAt(0)-97;
-            StableStorage storage = new StableStorage();
+            StableStorage storage = StableStorage.getInstance();
             DeleteMessage message = new DeleteMessage(roomName);
             List<Participant> participants = storage.getParticipants(roomName);
             storage.delete(roomName);
@@ -37,7 +37,7 @@ public class DeleteRoomCE implements CommandExecutor {
                     }});
             }
             executor.close();
-            String[] roomNodes = ReplicationManager.getInstance().getRoomNodes();
+            String[] roomNodes = ReplicationManager.getInstance().getRoomNodes().toArray(new String[0]);
             String address = roomNodes[x];
             DeleteMessageNode m = new DeleteMessageNode(roomName);
             m.sendMessage(new Participant(0,"x",address));

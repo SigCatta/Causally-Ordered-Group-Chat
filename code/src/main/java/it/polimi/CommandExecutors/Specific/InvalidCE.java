@@ -27,7 +27,7 @@ public class InvalidCE implements CommandExecutor {
         if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
             String text = command;
             text = RoomStateManager.getInstance().getUsername() + " : " + text;
-            StableStorage storage = new StableStorage();
+            StableStorage storage = StableStorage.getInstance();
             VectorClock vectorClock = storage.getCurrentVectorClock(RoomStateManager.getInstance().getRoomName());
             VectorClock updated=vectorClock.increment(storage.getIndex(RoomStateManager.getInstance().getRoomName(),RoomStateManager.getInstance().getUsername()));
             Message m = new Message(text,updated);

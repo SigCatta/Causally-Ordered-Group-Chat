@@ -41,7 +41,7 @@ public class NewRoomCE implements CommandExecutor {
                 participants.add(new Participant(i, userName, userIP));
             }
             participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort()));
-            StableStorage s = new StableStorage();
+            StableStorage s = StableStorage.getInstance();
             s.initNewRoom(roomName, participants);
 
            NewRoomMessage message = new NewRoomMessage(roomName, participants);

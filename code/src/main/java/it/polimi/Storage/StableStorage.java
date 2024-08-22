@@ -14,10 +14,18 @@ public class StableStorage {
     private final StorageWriter sw;
 
     private final StorageReader sr;
+    private static StableStorage instance = null;
 
-    public StableStorage() {
+    private StableStorage() {
         this.sw = new StorageWriter();
         this.sr = new StorageReader();
+    }
+
+    public static StableStorage getInstance() {
+        if (instance == null) {
+            instance = new StableStorage();
+        }
+        return instance;
     }
 
     // Creates and initializes all the files needed for a chat room

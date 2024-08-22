@@ -119,6 +119,9 @@ public class Main {
             }
         }
 
+        // TODO: If I experienced a catastrophic failure, I communicated the affected data to the responsible node
+
+
         // TODO: if any of my rooms have been deleted, delete them from the storage
         // TODO: maybe nodes should only have the deleted rooms that were under their responsibility
 
