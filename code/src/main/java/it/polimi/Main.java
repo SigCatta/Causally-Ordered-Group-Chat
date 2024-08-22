@@ -4,8 +4,11 @@ import it.polimi.CommandExecutors.CommandExecutorFactory;
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Replication.HelpMessage;
 import it.polimi.Message.Replication.RingDataRequestMessage;
+import it.polimi.Message.RoomNodes.CheckForDeletionMessage;
+import it.polimi.Message.RoomNodes.GetMyRoomsMessage;
 import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
+import it.polimi.Storage.StableStorage;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -102,8 +105,11 @@ public class Main {
     }
 
     @SuppressWarnings("BusyWait")
-    private static void startup(String endpoint){
-        new RingDataRequestMessage(RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort())
+    private static void startup(String endpoint) {
+        RoomStateManager state = RoomStateManager.getInstance();
+        String myEndpoint = state.getIp() + ':' + state.getPort();
+
+        new RingDataRequestMessage(myEndpoint)
                 .sendMessage(new Participant(0, "-", endpoint));
 
         int i = 0;
@@ -113,7 +119,7 @@ public class Main {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            if(i++ > 10){
+            if (i++ > 10) {
                 System.out.println("Failed to connect to the network. Exiting...");
                 System.exit(1);
             }
@@ -121,9 +127,20 @@ public class Main {
 
         // TODO: If I experienced a catastrophic failure, I communicated the affected data to the responsible node
 
+        // Check if any of my rooms have been deleted
+        StableStorage.getInstance().getRoomNames()
+                .forEach(r ->
+                        new CheckForDeletionMessage(r, myEndpoint)
+                                .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(r.charAt(0) - 'a')))
+                );
 
-        // TODO: if any of my rooms have been deleted, delete them from the storage
-        // TODO: maybe nodes should only have the deleted rooms that were under their responsibility
+        // Check for new rooms
+        ReplicationManager.getInstance().getRoomNodes().stream()
+                .distinct()
+                .forEach(n ->
+                        new GetMyRoomsMessage(state.getUsername(), myEndpoint)
+                                .sendMessage(new Participant(0, "-", n))
+                );
 
         // Help the nodes that are currently responsible for the most data
         new HelpMessage(true, false)
