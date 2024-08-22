@@ -64,7 +64,7 @@ public class HelpMessage extends Message implements Serializable {
                 for (int i = roomNodes.indexOf(myEntry); i < roomNodes.indexOf(myEntry) + count / 2; i++) {
                     roomNodesArr[i] = ip + ':' + port;
                 }
-                Message message = new UpdateRingsMessage(roomNodesArr, null);
+                Message message = new RingUpdateMessage(roomNodesArr, null);
                 Arrays.stream(roomNodesArr)
                         .distinct()
                         .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));
@@ -109,7 +109,7 @@ public class HelpMessage extends Message implements Serializable {
                 for (int i = userNodes.indexOf(myEntry); i < userNodes.indexOf(myEntry) + count / 2; i++) {
                     userNodesArr[i] = ip + ':' + port;
                 }
-                Message message = new UpdateRingsMessage(null, userNodesArr);
+                Message message = new RingUpdateMessage(null, userNodesArr);
                 Arrays.stream(userNodesArr)
                         .distinct()
                         .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));

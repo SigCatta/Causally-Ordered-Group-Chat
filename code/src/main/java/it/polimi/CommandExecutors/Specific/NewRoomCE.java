@@ -4,7 +4,7 @@ import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Participant;
 import it.polimi.Message.NewRoomMessage;
 import it.polimi.Message.NewRoomNodeMessage;
-import it.polimi.Message.Replication.GetUserAddressMessage;
+import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.HomeState;
 import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;

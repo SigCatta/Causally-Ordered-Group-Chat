@@ -6,11 +6,11 @@ import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
 
-public class UpdateRingsMessage extends Message implements Serializable {
+public class RingUpdateMessage extends Message implements Serializable {
     private final String[] roomNodes;
     private final String[] userNodes;
 
-    public UpdateRingsMessage(String[] roomNodes, String[] userNodes) {
+    public RingUpdateMessage(String[] roomNodes, String[] userNodes) {
         super(null);
         this.roomNodes = roomNodes;
         this.userNodes = userNodes;

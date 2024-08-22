@@ -1,4 +1,4 @@
-package it.polimi.Message.Replication;
+package it.polimi.Message.UserNodes;
 
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
