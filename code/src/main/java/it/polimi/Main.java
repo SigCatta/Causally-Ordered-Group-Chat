@@ -47,6 +47,9 @@ public class Main {
             System.out.println("Insert port of a member:");
             int memberPort = scanner.nextInt();
 
+            // Start the server thread
+            new Thread(() -> startListening(ip, port, username)).start();
+
             startup(memberIp + ':' + memberPort);
         } else if (!choice.equals("y")) {
             throw new RuntimeException("Invalid choice");
@@ -59,10 +62,10 @@ public class Main {
             }
             ReplicationManager.getInstance().addUser(state.getUsername(), state.getIp() + ':' + state.getPort());
             System.out.println("Network created!");
-        }
 
-        // Start the server thread
-        new Thread(() -> startListening(ip, port, username)).start();
+            // Start the server thread
+            new Thread(() -> startListening(ip, port, username)).start();
+        }
 
         readLine();
     }
@@ -117,7 +120,7 @@ public class Main {
         int i = 0;
         while (ReplicationManager.getInstance().getRoomNodes().contains(null) || ReplicationManager.getInstance().getUserNodes().contains(null)) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

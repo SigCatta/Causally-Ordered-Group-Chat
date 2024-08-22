@@ -31,7 +31,7 @@ public class NewRoomCE implements CommandExecutor {
             for (int i = 0; i < numberOfUsers; i++) {
                 System.out.println("Insert the name of the user: ");
                 String userName = scanner.next();
-                participants.add(numberOfUsers,userName);
+                participants.add(i,userName);
             }
             List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
             AtomicReference<String> address = new AtomicReference<>(roomNodes.get(x));
@@ -42,7 +42,7 @@ public class NewRoomCE implements CommandExecutor {
             participants.forEach( username -> {
                 GetUserAddressMessage message = new GetUserAddressMessage(username,a);
                 List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
-                String ind = userNodes.get(username.charAt(0));
+                String ind = userNodes.get(username.charAt(0) - 'a');
                 try {
                     String participantAddress = message.sendMessageAndGetResponse(ind);
                     Participant participant = new Participant(p.size() , username, participantAddress);

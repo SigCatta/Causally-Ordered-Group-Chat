@@ -6,10 +6,7 @@ import it.polimi.Entities.VectorClock;
 import it.polimi.States.RoomStateManager;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -110,8 +107,10 @@ class StorageReader {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Failed to read directories under " + basePath);
-            e.printStackTrace();
+            if (!(e instanceof NoSuchFileException)) {
+                System.err.println("Failed to read directories under " + basePath);
+                e.printStackTrace();
+            }
         }
 
         return directories;

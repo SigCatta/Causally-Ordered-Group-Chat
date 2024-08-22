@@ -21,6 +21,6 @@ public class RingDataResponseMessage extends Message implements Serializable {
     @Override
     public void process(RoomState state) {
         ReplicationManager.getInstance().setRoomNodes(roomNodes);
-        ReplicationManager.getInstance().setRoomNodes(userNodes);
+        ReplicationManager.getInstance().setUserNodes(userNodes);
     }
 }

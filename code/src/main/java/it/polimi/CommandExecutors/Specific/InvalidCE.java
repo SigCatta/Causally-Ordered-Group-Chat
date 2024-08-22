@@ -5,17 +5,13 @@ import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.ChatMessage;
-import it.polimi.Message.Replication.GetUserAddressMessage;
+import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.InRoomState;
 import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.List;
-import java.util.Scanner;
 
 public class InvalidCE implements CommandExecutor {
     private String command;
