@@ -121,20 +121,5 @@ class StorageWriter {
                 e.printStackTrace();
             }
         }
-
-        if (!Files.exists(PATH.resolve("ip_ring.txt"))) {
-            try {
-                Files.createFile(PATH.resolve("ip_ring.txt"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        if (!Files.exists(PATH.resolve("rooms_ring.txt"))) {
-            try {
-                Files.createFile(PATH.resolve("rooms_ring.txt"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

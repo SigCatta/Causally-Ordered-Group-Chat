@@ -25,7 +25,7 @@ public class RoomsListMessage extends Message implements Serializable {
             if (!roomsPresent.contains(room)) {
                 List<Participant> participants = new ArrayList<>();
                 for (int i = 0; i < users.size(); i++) {
-                    participants.add(new Participant(i, users.get(i), null)); // TODO: at some point we'll need to ask user nodes for IPs
+                    participants.add(new Participant(i, users.get(i), null));
                 }
                 StableStorage.getInstance().initNewRoom(room, participants);
             }

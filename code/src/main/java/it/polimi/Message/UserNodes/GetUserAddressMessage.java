@@ -1,49 +1,32 @@
 package it.polimi.Message.UserNodes;
 
+import it.polimi.Entities.Participant;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.ReplicationManager;
 
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.Socket;
 
 public class GetUserAddressMessage extends Message implements Serializable {
-    String name;
-    String senderaddress;
+    private final Participant participant;
+    private final String endpoint;
+    private final String roomName;
+    private final boolean creatingRoom;
 
-    public GetUserAddressMessage(String name,String address){
+    public GetUserAddressMessage(Participant participant, String endpoint, String roomName, boolean creatingRoom) {
         super("request of address");
-        this.name=name;
-        this.senderaddress=address;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSenderaddress() {
-        return senderaddress;
+        this.participant = participant;
+        this.endpoint = endpoint;
+        this.roomName = roomName;
+        this.creatingRoom = creatingRoom;
     }
 
     @Override
     public void process(RoomState state) {
-        String participantAddress = ReplicationManager.getInstance().getIpAddress(name);
-        try {
-            String[] parts = senderaddress.split(":");
-            String senderIP = parts[0];
-            int senderPort = Integer.parseInt(parts[1]);
-
-            try (Socket socket = new Socket(senderIP, senderPort);
-                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-
-                out.writeObject(participantAddress);
-                out.flush();
-            }
-
-        } catch (Exception e) {
-            System.err.println("Failed to send address response to " + senderaddress);
-            e.printStackTrace();
+        String address = ReplicationManager.getInstance().getIpAddress(participant.name());
+        if (!address.isEmpty()) {
+            new UserAddressResponseMessage(new Participant(participant.index(), participant.name(), address), roomName, creatingRoom)
+                    .sendMessage(new Participant(0, "-", endpoint));
         }
     }
 }

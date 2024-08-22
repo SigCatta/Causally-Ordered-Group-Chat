@@ -31,7 +31,7 @@ public class InvalidCE implements CommandExecutor {
             Message m = new Message(text,updated);
             ChatMessage chatMessage = new ChatMessage(m, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getRoomName());
             storage.deliverMessage(RoomStateManager.getInstance().getRoomName(),m);
-            String a = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
+            String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
             if(RoomStateManager.getInstance().getConnected()) {
                 List<Participant> participants = storage.getParticipants(RoomStateManager.getInstance().getRoomName());
                 for (Participant participant : participants) {
@@ -40,7 +40,7 @@ public class InvalidCE implements CommandExecutor {
                             chatMessage.sendMessage(participant);
                         }
                         else{
-                            GetUserAddressMessage message = new GetUserAddressMessage(participant.name(),a);
+                            GetUserAddressMessage message = new GetUserAddressMessage(participant, myEndpoint, RoomStateManager.getInstance().getRoomName(), false);
                             List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
                             String ind = userNodes.get(participant.name().charAt(0));
                             try {
