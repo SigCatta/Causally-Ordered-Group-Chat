@@ -8,8 +8,8 @@ import java.util.List;
 
 public class NewRoomNodeMessage extends Message implements Serializable {
     String roomName;
-    List<Participant> participants;
-    public NewRoomNodeMessage(String roomName, List<Participant> participants) {
+    List<String> participants;
+    public NewRoomNodeMessage(String roomName, List<String> participants) {
         super("You have a new room to add!");
         this.roomName = roomName;
         this.participants = participants;
@@ -18,7 +18,7 @@ public class NewRoomNodeMessage extends Message implements Serializable {
         return roomName;
     }
 
-    public List<Participant> getParticipants() {
+    public List<String> getParticipants() {
         return participants;
     }
     @Override

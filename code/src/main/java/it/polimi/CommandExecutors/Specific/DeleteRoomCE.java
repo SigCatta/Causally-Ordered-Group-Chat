@@ -37,8 +37,8 @@ public class DeleteRoomCE implements CommandExecutor {
                     }});
             }
             executor.close();
-            String[] roomNodes = ReplicationManager.getInstance().getRoomNodes();
-            String address = roomNodes[x];
+            List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
+            String address = roomNodes.get(x);
             DeleteMessageNode m = new DeleteMessageNode(roomName);
             m.sendMessage(new Participant(0,"x",address));
         }

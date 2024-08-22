@@ -4,6 +4,7 @@ import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Participant;
 import it.polimi.Message.NewRoomMessage;
 import it.polimi.Message.NewRoomNodeMessage;
+import it.polimi.Message.Replication.GetUserAddressMessage;
 import it.polimi.States.HomeState;
 import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
@@ -25,37 +26,46 @@ public class NewRoomCE implements CommandExecutor {
             Scanner scanner = new Scanner(System.in);
             System.out.println("Insert the name of the room: ");
             String roomName = scanner.nextLine();
-            int x = roomName.charAt(0)-97;
+            int x = roomName.charAt(0) - 97;
             System.out.println("Insert number of users to add (except you): ");
             Integer numberOfUsers = scanner.nextInt();
-            List<Participant> participants = new ArrayList<>();
+            List<String> participants = new ArrayList<>();
             for (int i = 0; i < numberOfUsers; i++) {
                 System.out.println("Insert the name of the user: ");
                 String userName = scanner.next();
-                System.out.println("Insert the IP address of the user: ");
-                String userIP = scanner.next();
-                System.out.println("Insert the port of the user: ");
-                Integer userPort = scanner.nextInt();
-                scanner.nextLine();
-                userIP = userIP + ":" + userPort;
-                participants.add(new Participant(i, userName, userIP));
+                participants.add(numberOfUsers,userName);
             }
-            participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort()));
-            StableStorage s = new StableStorage();
-            s.initNewRoom(roomName, participants);
-
-           NewRoomMessage message = new NewRoomMessage(roomName, participants);
-           ExecutorService executor = Executors.newFixedThreadPool(10);
-            for (Participant participant : participants) {
-                executor.submit(() -> {
-              if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
-                message.sendMessage(participant);
-            }});}
-            executor.close();
             String[] roomNodes = ReplicationManager.getInstance().getRoomNodes().toArray(new String[26]);
             String address = roomNodes[x];
-            NewRoomNodeMessage m = new NewRoomNodeMessage(roomName,participants);
-            m.sendMessage(new Participant(0,"x",address));
+            NewRoomNodeMessage m = new NewRoomNodeMessage(roomName, participants);
+            m.sendMessage(new Participant(0, "x", address));
+            List<Participant> p = new ArrayList<>();
+            String a = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
+            participants.forEach( username -> {
+                GetUserAddressMessage message = new GetUserAddressMessage(username,a);
+                try {
+                    String participantAddress = message.sendMessageAndGetResponse(address);
+                    Participant participant = new Participant(p.size() , username, participantAddress);
+                    p.add(participant);
+                } catch (Exception e) {
+                    System.err.println("Failed to get address for user: " + username);
+                    e.printStackTrace();
+                }
+            });
+            p.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort()));
+            StableStorage s = new StableStorage();
+            s.initNewRoom(roomName, p);
+
+            NewRoomMessage message = new NewRoomMessage(roomName, p);
+            ExecutorService executor = Executors.newFixedThreadPool(10);
+            for (Participant participant : p) {
+                executor.submit(() -> {
+                    if (!participant.name().equals(RoomStateManager.getInstance().getUsername())) {
+                        message.sendMessage(participant);
+                    }
+                });
+            }
+            executor.close();
         }
 
     }

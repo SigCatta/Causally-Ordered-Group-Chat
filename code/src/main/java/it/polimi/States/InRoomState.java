@@ -92,8 +92,7 @@ public class InRoomState implements RoomState {
     }
     @Override
     public void handle(NewRoomNodeMessage message){
-        List<String> usernames = usernames(message.getParticipants());
-        ReplicationManager.getInstance().addRoom(message.getRoomName(),usernames);
+        ReplicationManager.getInstance().addRoom(message.getRoomName(),message.getParticipants());
     }
 
     @Override
@@ -101,12 +100,5 @@ public class InRoomState implements RoomState {
         ReplicationManager.getInstance().deleteRoom(message.getRoomName());
     }
 
-    public List<String> usernames(List<Participant> participants){
-        List<String> u = new ArrayList<>();
-        for(Participant participant: participants){
-            u.add(participant.index(),participant.name());
-        }
-        return u;
-    }
 
 }
