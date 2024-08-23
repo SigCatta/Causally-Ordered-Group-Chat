@@ -49,7 +49,7 @@ public class NewRoomCE implements CommandExecutor {
             // Ask for the ip of each user
             participants.stream()
                     .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
-                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, true)
+                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, true, null)
                             .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
                     );
         }

@@ -11,10 +11,8 @@ import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
-import java.util.List;
-
 public class InvalidCE implements CommandExecutor {
-    private String command;
+    private final String command;
 
     public InvalidCE(String command) {
         this.command = command;
@@ -22,40 +20,33 @@ public class InvalidCE implements CommandExecutor {
 
     @Override
     public void execute() {
-        if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
+        if (RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()) {
             String text = command;
             text = RoomStateManager.getInstance().getUsername() + " : " + text;
             StableStorage storage = StableStorage.getInstance();
-            VectorClock vectorClock = storage.getCurrentVectorClock(RoomStateManager.getInstance().getRoomName());
-            VectorClock updated=vectorClock.increment(storage.getIndex(RoomStateManager.getInstance().getRoomName(),RoomStateManager.getInstance().getUsername()));
-            Message m = new Message(text,updated);
-            ChatMessage chatMessage = new ChatMessage(m, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getRoomName());
-            storage.deliverMessage(RoomStateManager.getInstance().getRoomName(),m);
-            String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
-            if(RoomStateManager.getInstance().getConnected()) {
-                List<Participant> participants = storage.getParticipants(RoomStateManager.getInstance().getRoomName());
-                for (Participant participant : participants) {
-                    if(!participant.name().equals(RoomStateManager.getInstance().getUsername())){
-                        if(participant.ipAddress()!=null){
-                            chatMessage.sendMessage(participant);
-                        }
-                        else{
-                            GetUserAddressMessage message = new GetUserAddressMessage(participant, myEndpoint, RoomStateManager.getInstance().getRoomName(), false);
-                            List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
-                            String ind = userNodes.get(participant.name().charAt(0));
-                            try {
-                                String participantAddress = message.sendMessageAndGetResponse(ind);
-                                StableStorage.getInstance().updateParticipantIp(RoomStateManager.getInstance().getRoomName(), new Participant(participant.index(),participant.name(),participantAddress));
-                                chatMessage.sendMessage(participant);
-                            } catch (Exception e) {
+            VectorClock updated = storage.getCurrentVectorClock(RoomStateManager.getInstance().getRoomName())
+                    .increment(storage.getIndex(RoomStateManager.getInstance().getRoomName(), RoomStateManager.getInstance().getUsername()));
+            Message msgToSend = new Message(text, updated);
+            ChatMessage chatMessage = new ChatMessage(msgToSend, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getRoomName());
+            storage.deliverMessage(RoomStateManager.getInstance().getRoomName(), msgToSend);
+            String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
 
+            if (RoomStateManager.getInstance().getConnected()) {
+                storage.getParticipants(RoomStateManager.getInstance().getRoomName()).stream()
+                        .filter(p -> !p.name().equals(RoomStateManager.getInstance().getUsername()))
+                        .forEach(p -> {
+                            if (!p.ipAddress().equals("null")) {
+                                chatMessage.sendMessage(p);
+                            } else {
+                                new GetUserAddressMessage(p, myEndpoint, RoomStateManager.getInstance().getRoomName(), false, chatMessage)
+                                        .sendMessage(new Participant(0, "-", ReplicationManager.getInstance()
+                                                .getRoomNodes().get(p.name().charAt(0) - 'a'))
+                                        );
                             }
-                        }
-                    }
-                }
-            }else{
-                storage.storeUnsentMessage(RoomStateManager.getInstance().getRoomName(),m);
-            }}
-        else System.out.println("Invalid command");
+                        });
+            } else {
+                storage.storeUnsentMessage(RoomStateManager.getInstance().getRoomName(), msgToSend);
+            }
+        } else System.out.println("Invalid command");
     }
 }
