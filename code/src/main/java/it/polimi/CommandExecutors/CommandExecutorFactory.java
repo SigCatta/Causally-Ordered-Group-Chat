@@ -11,6 +11,7 @@ public class CommandExecutorFactory {
             case "list-rooms" -> new ListRoomsCE();
             case "exit-room" -> new ExitRoomCE();
             case "disconnect" -> new DisconnectCE();
+            case "connect" -> new ConnectCE();
             default -> new InvalidCE(command);
         };
     }

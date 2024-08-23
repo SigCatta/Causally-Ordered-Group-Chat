@@ -19,7 +19,6 @@ import java.util.concurrent.Executors;
 
 public class ClientHandler implements Runnable {
     private volatile Socket clientSocket;
-    private ObjectOutputStream output;
     private ObjectInputStream input;
     private final String ip;
     private final int port;
@@ -39,10 +38,8 @@ public class ClientHandler implements Runnable {
 
     private void setupStreams() {
         try {
-            this.output = new ObjectOutputStream(clientSocket.getOutputStream());
             this.input = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
-            setupStreams();
             //e.printStackTrace();
         }
     }
@@ -105,9 +102,6 @@ public class ClientHandler implements Runnable {
         try {
             if (input != null) {
                 input.close();
-            }
-            if (output != null) {
-                output.close();
             }
             if (clientSocket != null) {
                 clientSocket.close();

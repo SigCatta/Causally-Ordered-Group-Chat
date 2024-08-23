@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    private static ServerSocket serverSocket;
+    private static Thread listeningThread;
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -75,22 +77,47 @@ public class Main {
     }
 
     public static void startListening(String ip, int port, String username) {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try {
+            serverSocket = new ServerSocket(port);
+            serverSocket.setReuseAddress(true); // Allow reuse of the port
+
             RoomStateManager.getInstance().setConnected(true);
-            while (!Thread.currentThread().isInterrupted()) {
-                try {
-                    Socket client = serverSocket.accept();
-                    client.setSoTimeout(30000);
-                    ClientHandler clientHandler = new ClientHandler(client, ip, port, username);
-                    Thread thread = new Thread(clientHandler, "ss_handler" + client.getInetAddress());
-                    thread.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+            listeningThread = new Thread(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        Socket client = serverSocket.accept();
+                        client.setSoTimeout(30000);
+                        ClientHandler clientHandler = new ClientHandler(client, ip, port, username);
+                        Thread thread = new Thread(clientHandler, "ss_handler" + client.getInetAddress());
+                        thread.start();
+                    } catch (IOException e) {
+                        if (!serverSocket.isClosed()) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
                 }
-            }
+            });
+
+            listeningThread.start();
+
         } catch (IOException e) {
             e.printStackTrace();
             RoomStateManager.getInstance().setConnected(false);
+        }
+    }
+
+    public static void stopListening() {
+        try {
+            if (serverSocket != null && !serverSocket.isClosed()) {
+                serverSocket.close();
+            }
+            if (listeningThread != null && listeningThread.isAlive()) {
+                listeningThread.interrupt();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -114,7 +141,7 @@ public class Main {
     }
 
     @SuppressWarnings("BusyWait")
-    private static void startup(String endpoint) {
+    public static void startup(String endpoint) {
         RoomStateManager state = RoomStateManager.getInstance();
         String myEndpoint = state.getIp() + ':' + state.getPort();
 
