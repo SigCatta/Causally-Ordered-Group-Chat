@@ -10,6 +10,7 @@ public class CommandExecutorFactory {
             case "delete-room" -> new DeleteRoomCE();
             case "list-rooms" -> new ListRoomsCE();
             case "exit-room" -> new ExitRoomCE();
+            case "disconnect" -> new DisconnectCE();
             default -> new InvalidCE(command);
         };
     }
