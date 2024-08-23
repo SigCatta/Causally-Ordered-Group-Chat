@@ -42,7 +42,7 @@ public class ClientHandler implements Runnable {
             this.output = new ObjectOutputStream(clientSocket.getOutputStream());
             this.input = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
-            System.out.println("ciaooone");
+            setupStreams();
             //e.printStackTrace();
         }
     }

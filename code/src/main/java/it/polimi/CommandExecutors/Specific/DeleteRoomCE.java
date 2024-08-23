@@ -41,6 +41,6 @@ public class DeleteRoomCE implements CommandExecutor {
             String address = roomNodes.get(x);
             DeleteMessageNode m = new DeleteMessageNode(roomName);
             m.sendMessage(new Participant(0,"x",address));
-        }
+        } else System.out.println("you must enter the room in order to delete it");
     }
 }
