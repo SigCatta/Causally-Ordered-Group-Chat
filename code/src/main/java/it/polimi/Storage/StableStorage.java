@@ -268,14 +268,15 @@ public class StableStorage {
     }
 
     // Prints all messages in a chat room
-    public void getChat(String roomName){
+    public void printChat(String roomName){
         sr.getMessages(roomName)
                 .subList(1, sr.getMessages(roomName).size()) // we don't need to print the first message
                 .stream().map(Message::text)
                 .forEach(System.out::println);
     }
+
+    // Returns all the delivered messages from a chat
     public List<Message> getChatMessages(String roomName){
-        List<Message> messages = sr.getMessages(roomName);
-        return messages;
+        return sr.getMessages(roomName);
     }
 }

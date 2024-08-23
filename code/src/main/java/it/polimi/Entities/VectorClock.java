@@ -36,6 +36,7 @@ public record VectorClock(List<Integer> vector) implements Serializable {
         return true;
     }
 
+    // True if the given vector clock is newer by more than 2 integers
     public boolean isYoungerExceptForOne(VectorClock other) {
         List<Integer> otherVector = other.vector();
         int count = 0;
