@@ -131,7 +131,7 @@ public class Main {
         }
 
         // TODO: If I experienced a catastrophic failure, I communicated the affected data to the responsible node
-
+        // sends its ip to other node participants
         new JoinMessage(state.getUsername(), myEndpoint)
                 .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(state.getUsername().charAt(0) - 'a')));
 

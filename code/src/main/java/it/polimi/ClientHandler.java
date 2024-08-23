@@ -56,6 +56,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    @SuppressWarnings("BusyWait")
     private void reconnectInBackground() {
         while (true) {
             try {
@@ -69,7 +70,7 @@ public class ClientHandler implements Runnable {
             } catch (IOException e) {
                 System.out.println("Reconnection failed. Retrying in 30 seconds...");
                 try {
-                    Thread.sleep(30000); // Wait before retrying
+                    Thread.sleep(5000); // Wait before retrying
                 } catch (InterruptedException interruptedException) {
                     Thread.currentThread().interrupt(); // Restore interrupt status
                 }

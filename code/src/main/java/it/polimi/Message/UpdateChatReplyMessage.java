@@ -2,6 +2,7 @@ package it.polimi.Message;
 
 import it.polimi.Entities.VectorClock;
 import it.polimi.States.RoomState;
+import it.polimi.Storage.StableStorage;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,6 +39,7 @@ public class UpdateChatReplyMessage extends Message implements Serializable {
     }
     @Override
     public void process(RoomState state) {
-
+        chatmessages.forEach(message -> StableStorage.getInstance().delayMessage(roomName,message));
+        StableStorage.getInstance().deliverDelayedMessages(roomName);
     }
 }
