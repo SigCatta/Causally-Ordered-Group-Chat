@@ -23,14 +23,12 @@ public class RingUpdateMessage extends Message implements Serializable {
             for (int i = 0; i < roomNodes.length; i++) {
                 if (roomNodes[i] != null) ReplicationManager.getInstance().updateRoomNode(roomNodes[i], i);
             }
-            System.out.println(Arrays.toString(roomNodes));
         }
 
         if (userNodes != null) {
             for (int i = 0; i < userNodes.length; i++) {
                 if (userNodes[i] != null) ReplicationManager.getInstance().updateUserNode(userNodes[i], i);
             }
-            System.out.println(Arrays.toString(userNodes));
         }
     }
 }

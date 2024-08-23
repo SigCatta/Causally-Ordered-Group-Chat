@@ -2,6 +2,7 @@ package it.polimi;
 
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
+import it.polimi.Message.HelloMessage;
 import it.polimi.Message.Message;
 import it.polimi.Message.UpdateChatRequestMessage;
 import it.polimi.States.RoomStateManager;
@@ -41,7 +42,8 @@ public class ClientHandler implements Runnable {
             this.output = new ObjectOutputStream(clientSocket.getOutputStream());
             this.input = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("ciaooone");
+            //e.printStackTrace();
         }
     }
 
