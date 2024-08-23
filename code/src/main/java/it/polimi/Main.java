@@ -14,6 +14,7 @@ import it.polimi.Storage.StableStorage;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -66,6 +67,9 @@ public class Main {
             // Start the server thread
             new Thread(() -> startListening(ip, port, username)).start();
         }
+
+        // Register shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(LastWill::execute));
 
         readLine();
     }
