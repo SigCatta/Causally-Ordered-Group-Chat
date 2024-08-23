@@ -5,7 +5,7 @@ import it.polimi.States.RoomState;
 import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.List;
 
 public class RingUpdateMessage extends Message implements Serializable {
     private final String[] roomNodes;
