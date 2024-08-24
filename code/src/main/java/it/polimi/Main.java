@@ -1,9 +1,12 @@
 package it.polimi;
 
 import it.polimi.CommandExecutors.CommandExecutorFactory;
+import it.polimi.Entities.DataContainer;
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Replication.HelpMessage;
 import it.polimi.Message.Replication.RingDataRequestMessage;
+import it.polimi.Message.Replication.RoomNodeProposalMessage;
+import it.polimi.Message.Replication.UserNodeProposalMessage;
 import it.polimi.Message.RoomNodes.CheckForDeletionMessage;
 import it.polimi.Message.RoomNodes.GetMyRoomsMessage;
 import it.polimi.Message.UserNodes.JoinMessage;
@@ -14,12 +17,18 @@ import it.polimi.Storage.StableStorage;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLOutput;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 
 public class Main {
     private static ServerSocket serverSocket;
     private static Thread listeningThread;
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
@@ -57,6 +66,9 @@ public class Main {
         } else if (!choice.equals("y")) {
             throw new RuntimeException("Invalid choice");
         } else {
+            if (StableStorage.getInstance().getBackupData() != null)
+                throw new RuntimeException("Backup data found. Please restore it before creating a new network.");
+
             // the node who creates the network is responsible for everything in both rings
             String entry = ip + ':' + port;
             for (int i = 0; i < 26; i++) {
@@ -69,6 +81,7 @@ public class Main {
             // Start the server thread
             new Thread(() -> startListening(ip, port, username)).start();
         }
+
 
         // Register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(LastWill::execute));
@@ -148,20 +161,22 @@ public class Main {
         new RingDataRequestMessage(myEndpoint)
                 .sendMessage(new Participant(0, "-", endpoint));
 
-        int i = 0;
+        int attempts = 0;
         while (ReplicationManager.getInstance().getRoomNodes().contains(null) || ReplicationManager.getInstance().getUserNodes().contains(null)) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            if (i++ > 10) {
+            if (attempts++ > 10) {
                 System.out.println("Failed to connect to the network. Exiting...");
                 System.exit(1);
             }
         }
 
-        // TODO: If I experienced a catastrophic failure, I communicated the affected data to the responsible node
+        // Restore backup data if present
+        sendBackups();
+
         // sends its ip to other node participants
         new JoinMessage(state.getUsername(), myEndpoint)
                 .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(state.getUsername().charAt(0) - 'a')));
@@ -186,6 +201,45 @@ public class Main {
                 .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseRoomNodeToHelp()));
         new HelpMessage(false, true)
                 .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseUserNodeToHelp()));
+    }
 
+    private static void sendBackups() {
+        DataContainer backup = StableStorage.getInstance().getBackupData();
+        if (backup == null) return; // no backup data to restore
+        System.out.println(backup.roomsMap());
+
+        IntStream.range(0, 26)
+                // for each letter, send the data to the corresponding node
+                .forEach(i -> {
+                    if (backup.roomsMap() != null && backup.deletedRooms() != null) {
+                        ConcurrentHashMap<String, List<String>> rooms = backup.roomsMap()
+                                .entrySet().stream()
+                                .filter(e -> e.getKey().charAt(0) - 'a' == i)
+                                .collect(ConcurrentHashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), ConcurrentHashMap::putAll);
+
+                        Set<String> deletedRooms = backup.deletedRooms().stream()
+                                .filter(r -> r.charAt(0) - 'a' == i)
+                                .collect(HashSet::new, Set::add, Set::addAll);
+
+                        if (!rooms.isEmpty() || !deletedRooms.isEmpty()) {
+                            new RoomNodeProposalMessage(rooms, deletedRooms)
+                                    .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(i)));
+                        }
+                    }
+
+                    if (backup.usersMap() != null) {
+                        ConcurrentHashMap<String, String> users = backup.usersMap()
+                                .entrySet().stream()
+                                .filter(e -> e.getKey().charAt(0) - 'a' == i)
+                                .collect(ConcurrentHashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), ConcurrentHashMap::putAll);
+
+                        if (!users.isEmpty()) {
+                            new UserNodeProposalMessage(users)
+                                    .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(i)));
+                        }
+                    }
+                });
+
+        StableStorage.getInstance().deleteBackup();
     }
 }

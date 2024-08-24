@@ -122,4 +122,8 @@ class StorageWriter {
             }
         }
     }
+
+    public Path getPATH() {
+        return PATH;
+    }
 }

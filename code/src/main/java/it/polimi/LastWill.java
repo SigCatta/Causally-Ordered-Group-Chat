@@ -1,15 +1,29 @@
 package it.polimi;
 
+import it.polimi.Entities.DataContainer;
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Replication.LastWillMessage;
 import it.polimi.Message.Replication.RingUpdateMessage;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.DataSerializer;
 import it.polimi.Storage.ReplicationManager;
+import it.polimi.Storage.StableStorage;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LastWill {
     public static void execute() {
+        try {
+            sendLastWill();
+        } catch (Exception e) {
+            // If for some reason data cannot be sent, save it to disk so not to lose it
+            saveDataToDisk();
+        }
+    }
+
+    private static void sendLastWill() {
         String myEndpoint = RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort();
         List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
         List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
@@ -67,5 +81,15 @@ public class LastWill {
                     .filter(ip -> !ip.equals(myEndpoint))
                     .forEach(ip -> ringUpdateMessage.sendMessage(new Participant(0, "-", ip)));
         }
+
+    }
+
+    private static void saveDataToDisk() {
+        ConcurrentHashMap<String, List<String>> roomsMap = ReplicationManager.getInstance().getRoomsMap();
+        Set<String> deletedRooms = ReplicationManager.getInstance().getDeletedRooms();
+        ConcurrentHashMap<String, String> usersMap = ReplicationManager.getInstance().getUsersMap();
+
+        // Serialize data to disk
+        DataSerializer.serializeData(StableStorage.getInstance().getBackupPath(), new DataContainer(roomsMap, deletedRooms, usersMap));
     }
 }

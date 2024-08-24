@@ -1,9 +1,12 @@
 package it.polimi.Storage;
 
+import it.polimi.Entities.DataContainer;
 import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -74,10 +77,10 @@ public class StableStorage {
         return sr.getParticipants(roomId);
     }
 
-    public Participant getParticipant(String roomId, String username){
+    public Participant getParticipant(String roomId, String username) {
         List<Participant> participants = getParticipants(roomId);
-        for (Participant p : participants){
-            if (p.name().equals(username)){
+        for (Participant p : participants) {
+            if (p.name().equals(username)) {
                 return p;
             }
         }
@@ -257,10 +260,10 @@ public class StableStorage {
     }
 
     // Returns the index of a given user in the given chat room
-    public int getIndex(String roomName, String username){
+    public int getIndex(String roomName, String username) {
         List<Participant> participants = getParticipants(roomName);
-        for (Participant p : participants){
-            if (p.name().equals(username)){
+        for (Participant p : participants) {
+            if (p.name().equals(username)) {
                 return p.index();
             }
         }
@@ -268,7 +271,7 @@ public class StableStorage {
     }
 
     // Prints all messages in a chat room
-    public void printChat(String roomName){
+    public void printChat(String roomName) {
         sr.getMessages(roomName)
                 .subList(1, sr.getMessages(roomName).size()) // we don't need to print the first message
                 .stream().map(Message::text)
@@ -276,7 +279,29 @@ public class StableStorage {
     }
 
     // Returns all the delivered messages from a chat
-    public List<Message> getChatMessages(String roomName){
+    public List<Message> getChatMessages(String roomName) {
         return sr.getMessages(roomName);
+    }
+
+
+    public Path getBackupPath() {
+        return sw.getPATH().resolve("backup.dat");
+    }
+
+    public DataContainer getBackupData() {
+        try {
+            if (!Files.exists(getBackupPath())) return null;
+            return DataSerializer.deserializeData(getBackupPath());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public void deleteBackup() {
+        try {
+            Files.deleteIfExists(getBackupPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

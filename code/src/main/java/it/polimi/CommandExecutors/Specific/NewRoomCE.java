@@ -31,6 +31,7 @@ public class NewRoomCE implements CommandExecutor {
                 System.out.println("Insert the name of the user: ");
                 users.add(i, scanner.next());
             }
+            users.add(users.size(), RoomStateManager.getInstance().getUsername());
 
             // Tell the node responsible for that room to create it
             new NewRoomNodeMessage(roomName, users)
@@ -41,7 +42,7 @@ public class NewRoomCE implements CommandExecutor {
             users.stream()
                     .map(username -> new Participant(participants.size(), username, null))
                     .forEach(participants::add);
-            participants.add(new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), myEndpoint));
+            participants.set(numberOfUsers, new Participant(numberOfUsers, RoomStateManager.getInstance().getUsername(), myEndpoint));
 
             // Create the room locally
             StableStorage.getInstance().initNewRoom(roomName, participants);
