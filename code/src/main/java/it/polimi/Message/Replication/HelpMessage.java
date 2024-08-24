@@ -7,7 +7,7 @@ import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,12 +60,12 @@ public class HelpMessage extends Message implements Serializable {
                 }
 
                 // tell other ring nodes about the change
-                String[] roomNodesArr = ReplicationManager.getInstance().getRoomNodes().toArray(new String[26]);
+                List<String> newRoomNodes = new ArrayList<>(ReplicationManager.getInstance().getRoomNodes());
                 for (int i = roomNodes.indexOf(myEntry); i < roomNodes.indexOf(myEntry) + count / 2; i++) {
-                    roomNodesArr[i] = ip + ':' + port;
+                    newRoomNodes.set(i, ip + ':' + port);
                 }
-                Message message = new RingUpdateMessage(roomNodesArr, null);
-                Arrays.stream(roomNodesArr)
+                Message message = new RingUpdateMessage(newRoomNodes, null);
+                newRoomNodes.stream()
                         .distinct()
                         .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));
 
@@ -105,12 +105,12 @@ public class HelpMessage extends Message implements Serializable {
                 }
 
                 // tell other ring nodes about the change
-                String[] userNodesArr = ReplicationManager.getInstance().getRoomNodes().toArray(new String[26]);
+                List<String> newUserNodes = new ArrayList<>(ReplicationManager.getInstance().getUserNodes());
                 for (int i = userNodes.indexOf(myEntry); i < userNodes.indexOf(myEntry) + count / 2; i++) {
-                    userNodesArr[i] = ip + ':' + port;
+                    newUserNodes.set(i, ip + ':' + port);
                 }
-                Message message = new RingUpdateMessage(null, userNodesArr);
-                Arrays.stream(userNodesArr)
+                Message message = new RingUpdateMessage(null, newUserNodes);
+                newUserNodes.stream()
                         .distinct()
                         .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));
 

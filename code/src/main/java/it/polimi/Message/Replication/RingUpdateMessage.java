@@ -8,10 +8,10 @@ import java.io.Serializable;
 import java.util.List;
 
 public class RingUpdateMessage extends Message implements Serializable {
-    private final String[] roomNodes;
-    private final String[] userNodes;
+    private final List<String> roomNodes;
+    private final List<String> userNodes;
 
-    public RingUpdateMessage(String[] roomNodes, String[] userNodes) {
+    public RingUpdateMessage(List<String> roomNodes, List<String> userNodes) {
         super(null);
         this.roomNodes = roomNodes;
         this.userNodes = userNodes;
@@ -20,14 +20,14 @@ public class RingUpdateMessage extends Message implements Serializable {
     @Override
     public void process(RoomState state) {
         if (roomNodes != null) {
-            for (int i = 0; i < roomNodes.length; i++) {
-                if (roomNodes[i] != null) ReplicationManager.getInstance().updateRoomNode(roomNodes[i], i);
+            for (int i = 0; i < roomNodes.size(); i++) {
+                if (roomNodes.get(i) != null) ReplicationManager.getInstance().updateRoomNode(roomNodes.get(i), i);
             }
         }
 
         if (userNodes != null) {
-            for (int i = 0; i < userNodes.length; i++) {
-                if (userNodes[i] != null) ReplicationManager.getInstance().updateUserNode(userNodes[i], i);
+            for (int i = 0; i < userNodes.size(); i++) {
+                if (userNodes.get(i) != null) ReplicationManager.getInstance().updateUserNode(userNodes.get(i), i);
             }
         }
     }

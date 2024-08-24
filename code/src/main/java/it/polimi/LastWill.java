@@ -34,7 +34,7 @@ public class LastWill {
                     roomNodes.set(i, saviour);
             }
 
-            RingUpdateMessage ringUpdateMessage = new RingUpdateMessage((String[]) roomNodes.toArray(), null);
+            RingUpdateMessage ringUpdateMessage = new RingUpdateMessage(roomNodes, null);
             roomNodes.stream()
                     .distinct()
                     .filter(ip -> !ip.equals(myEndpoint))
@@ -61,7 +61,7 @@ public class LastWill {
                     userNodes.set(i, saviour);
             }
 
-            RingUpdateMessage ringUpdateMessage = new RingUpdateMessage(null, (String[]) userNodes.toArray());
+            RingUpdateMessage ringUpdateMessage = new RingUpdateMessage(null, userNodes);
             userNodes.stream()
                     .distinct()
                     .filter(ip -> !ip.equals(myEndpoint))
