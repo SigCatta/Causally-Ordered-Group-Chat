@@ -77,14 +77,15 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void update_chats() {
+    public static void update_chats() {
         StableStorage storage = StableStorage.getInstance();
         List<String> rooms = storage.getRoomNames();
         for (String room : rooms) {
             List<Participant> participants = storage.getParticipants(room);
             VectorClock vc = storage.getCurrentVectorClock(room);
+            System.out.println("prendo unsentmex chat"+room);
             List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
-            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, state.getUsername(), vc, unsentMessages);
+            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, RoomStateManager.getInstance().getUsername(), vc, unsentMessages);
             ExecutorService executor = Executors.newFixedThreadPool(10);
             for (Participant participant : participants) {
                 executor.submit(() -> {
