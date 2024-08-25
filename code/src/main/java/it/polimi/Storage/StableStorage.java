@@ -177,6 +177,7 @@ public class StableStorage {
     // Deliver all deliverable delayed messages
     public void deliverDelayedMessages(String roomId) {
         List<Message> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
+        List<Message> chat = new ArrayList<>(sr.getMessages(roomId));
         VectorClock vc = getCurrentVectorClock(roomId);
 
         int size = messages.size();
@@ -184,10 +185,12 @@ public class StableStorage {
             Message msg = messages.getFirst();
             VectorClock newVC = msg.vectorClock();
             if (newVC.canBeDeliveredAfter(vc)) {
+                if(!chat.contains(msg)){
+                    deliverMessage(roomId, msg);
+                }
                 vc = newVC;
-                deliverMessage(roomId, msg);
 
-                // Remove delivered data from delayed lists
+                // Remove delivered data from delayed list
                 messages.removeFirst();
             } else break;
         }

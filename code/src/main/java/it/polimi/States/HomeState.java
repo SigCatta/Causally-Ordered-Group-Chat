@@ -4,6 +4,7 @@ import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.*;
+import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
@@ -72,7 +73,9 @@ public class HomeState implements RoomState{
         UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage
                 (message.getRoomName(), RoomStateManager.getInstance().getUsername(), storage.getCurrentVectorClock(message.getRoomName()), chatmessages);
         Participant p = storage.getParticipant(message.getRoomName(), message.getSender());
-        replyMessage.sendMessage(p);
+        String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
+        new GetUserAddressMessage(p, myEndpoint, message.getRoomName(), false, replyMessage)
+                .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')));
     }
 
     @Override

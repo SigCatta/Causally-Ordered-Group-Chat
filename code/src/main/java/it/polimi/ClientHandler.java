@@ -5,7 +5,9 @@ import it.polimi.Entities.VectorClock;
 import it.polimi.Message.HelloMessage;
 import it.polimi.Message.Message;
 import it.polimi.Message.UpdateChatRequestMessage;
+import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
 import java.io.EOFException;
@@ -86,15 +88,13 @@ public class ClientHandler implements Runnable {
             System.out.println("prendo unsentmex chat"+room);
             List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
             UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, RoomStateManager.getInstance().getUsername(), vc, unsentMessages);
-            ExecutorService executor = Executors.newFixedThreadPool(10);
-            for (Participant participant : participants) {
-                executor.submit(() -> {
-                    if (!participant.name().equals(RoomStateManager.getInstance().getUsername())) {
-                        message.sendMessage(participant);
-                    }
-                });
-            }
-            executor.close();
+
+            String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
+            participants.stream()
+                    .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
+                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, false, message)
+                            .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
+                    );
         }
     }
 
