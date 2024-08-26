@@ -28,7 +28,6 @@ public class DeleteRoomCE implements CommandExecutor {
             StableStorage storage = StableStorage.getInstance();
             DeleteMessage message = new DeleteMessage(roomName);
             List<Participant> participants = storage.getParticipants(roomName);
-            storage.delete(roomName);
 
             List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
             String address = roomNodes.get(x);
@@ -43,7 +42,7 @@ public class DeleteRoomCE implements CommandExecutor {
                     .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, false, message)
                             .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
                     );
-
+            storage.delete(roomName);
         } else System.out.println("you must enter the room in order to delete it");
     }
 }

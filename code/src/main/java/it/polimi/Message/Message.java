@@ -32,7 +32,7 @@ public abstract class Message implements Serializable {
             handleException();
             //System.err.println("Failed to send message to " + participant.name() + " at " + participant.ipAddress());
             //TODO : consider the fact that this specific user must be notified when reconnecting
-           // e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 

@@ -136,21 +136,13 @@ public class Main {
 
     public static void readLine() {
         Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter commands (type 'exit' to quit):");
+        System.out.println("Enter commands :");
 
         while (true) {
             String command = scanner.nextLine();
-
-            if ("exit".equals(command)) {
-                System.out.println("Exiting...");
-                break;
-            } else {
-                CommandExecutorFactory.getCommand(command).execute();
-            }
+            CommandExecutorFactory.getCommand(command).execute();
         }
 
-        scanner.close();
     }
 
     @SuppressWarnings("BusyWait")
