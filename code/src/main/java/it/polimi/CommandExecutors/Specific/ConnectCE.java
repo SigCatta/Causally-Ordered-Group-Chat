@@ -1,6 +1,5 @@
 package it.polimi.CommandExecutors.Specific;
 
-import it.polimi.ClientHandler;
 import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Main;
 import it.polimi.States.RoomStateManager;
@@ -16,7 +15,8 @@ public class ConnectCE implements CommandExecutor {
         System.out.println("Insert port of a member:");
         int memberPort = scanner.nextInt();
         new Thread(() -> Main.startListening(RoomStateManager.getInstance().getIp(), RoomStateManager.getInstance().getPort(), RoomStateManager.getInstance().getUsername())).start();
-        new Thread(() -> Main.startup(memberIp+":"+ memberPort)).start();
+        Main.endpoint = memberIp + ':' + memberPort;
+        new Thread(Main::startup).start();
         RoomStateManager.getInstance().setConnected(true);
     }
 }

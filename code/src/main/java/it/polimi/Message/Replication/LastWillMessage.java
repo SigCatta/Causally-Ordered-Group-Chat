@@ -1,5 +1,6 @@
 package it.polimi.Message.Replication;
 
+import it.polimi.LastWill;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.ReplicationManager;
@@ -31,5 +32,10 @@ public class LastWillMessage extends Message implements Serializable {
             ReplicationManager.getInstance().getRoomsMap().putAll(roomsMap);
             ReplicationManager.getInstance().getDeletedRooms().addAll(deletedRooms);
         }
+    }
+
+    @Override
+    public void handleException(){
+        LastWill.saveDataToDisk();
     }
 }

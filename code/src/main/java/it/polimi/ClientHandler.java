@@ -55,7 +55,7 @@ public class ClientHandler implements Runnable {
                 setupStreams();
                 System.out.println("Reconnected to server");
                 state.setConnected(true);
-                Main.startup(ip + ":" + port);
+                Main.startup();
                 run(); // Restart handling messages once reconnected
                 break;
             } catch (IOException e) {

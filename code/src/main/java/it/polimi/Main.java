@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 public class Main {
     private static ServerSocket serverSocket;
     private static Thread listeningThread;
+    public static String endpoint;
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -61,10 +62,12 @@ public class Main {
             System.out.println("Insert port of a member:");
             int memberPort = scanner.nextInt();
 
+            endpoint = memberIp + ':' + memberPort;
+
             // Start the server thread
             new Thread(() -> startListening(ip, port, username)).start();
 
-            startup(memberIp + ':' + memberPort);
+            startup();
         } else if (!choice.equals("y")) {
             throw new RuntimeException("Invalid choice");
         } else {
@@ -136,6 +139,7 @@ public class Main {
         }
     }
 
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void readLine() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter commands :");
@@ -144,11 +148,10 @@ public class Main {
             String command = scanner.nextLine();
             CommandExecutorFactory.getCommand(command).execute();
         }
-
     }
 
     @SuppressWarnings("BusyWait")
-    public static void startup(String endpoint) {
+    public static void startup() {
         RoomStateManager state = RoomStateManager.getInstance();
         String myEndpoint = state.getIp() + ':' + state.getPort();
 

@@ -28,6 +28,11 @@ public class LastWill {
         List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
         List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
 
+        if (!RoomStateManager.getInstance().getConnected()) {
+            saveDataToDisk();
+            return;
+        }
+
         // If I am a room node, send the data
         if (roomNodes.contains(myEndpoint)) {
             String saviour;
@@ -84,7 +89,7 @@ public class LastWill {
 
     }
 
-    private static void saveDataToDisk() {
+    public static void saveDataToDisk() {
         ConcurrentHashMap<String, List<String>> roomsMap = ReplicationManager.getInstance().getRoomsMap();
         Set<String> deletedRooms = ReplicationManager.getInstance().getDeletedRooms();
         ConcurrentHashMap<String, String> usersMap = ReplicationManager.getInstance().getUsersMap();
