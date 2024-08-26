@@ -94,6 +94,7 @@ public class StableStorage {
         StringBuilder sb = new StringBuilder();
 
         // update the participant's ip address, while leaving the other ones untouched
+        waitForAccess();
         sr.getParticipants(roomId)
                 .forEach(p -> {
                     if (p.index() == participant.index()) {
@@ -104,6 +105,7 @@ public class StableStorage {
                 });
 
         sw.overwrite(Paths.get(roomId, "addresses.txt"), sb.toString());
+        sem.release();
     }
 
     // Returns the current vector clock
