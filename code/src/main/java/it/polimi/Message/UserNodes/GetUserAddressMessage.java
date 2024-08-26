@@ -26,9 +26,10 @@ public class GetUserAddressMessage extends Message implements Serializable {
     @Override
     public void process(RoomState state) {
         String address = ReplicationManager.getInstance().getIpAddress(participant.name());
-        if (!(address == null) || !address.isEmpty()) {
-            new UserAddressResponseMessage(new Participant(participant.index(), participant.name(), address), roomName, creatingRoom, message)
-                    .sendMessage(new Participant(0, "-", endpoint));
-        }
+        if (address != null)
+            if (!address.isEmpty()) {
+                new UserAddressResponseMessage(new Participant(participant.index(), participant.name(), address), roomName, creatingRoom, message)
+                        .sendMessage(new Participant(0, "-", endpoint));
+            }
     }
 }
