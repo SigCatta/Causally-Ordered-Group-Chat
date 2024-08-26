@@ -3,12 +3,15 @@ package it.polimi;
 import it.polimi.CommandExecutors.CommandExecutorFactory;
 import it.polimi.Entities.DataContainer;
 import it.polimi.Entities.Participant;
+import it.polimi.Entities.VectorClock;
 import it.polimi.Message.Replication.HelpMessage;
 import it.polimi.Message.Replication.RingDataRequestMessage;
 import it.polimi.Message.Replication.RoomNodeProposalMessage;
 import it.polimi.Message.Replication.UserNodeProposalMessage;
 import it.polimi.Message.RoomNodes.CheckForDeletionMessage;
 import it.polimi.Message.RoomNodes.GetMyRoomsMessage;
+import it.polimi.Message.UpdateChatRequestMessage;
+import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Message.UserNodes.JoinMessage;
 import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
@@ -17,7 +20,6 @@ import it.polimi.Storage.StableStorage;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.SQLOutput;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -180,6 +182,8 @@ public class Main {
                                 .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(r.charAt(0) - 'a')))
                 );
 
+        update_chats();
+
         // Check for new rooms
         ReplicationManager.getInstance().getRoomNodes().stream()
                 .distinct()
@@ -198,7 +202,6 @@ public class Main {
     private static void sendBackups() {
         DataContainer backup = StableStorage.getInstance().getBackupData();
         if (backup == null) return; // no backup data to restore
-        System.out.println(backup.roomsMap());
 
         IntStream.range(0, 26)
                 // for each letter, send the data to the corresponding node
@@ -233,5 +236,24 @@ public class Main {
                 });
 
         StableStorage.getInstance().deleteBackup();
+    }
+
+    private static void update_chats() {
+        StableStorage storage = StableStorage.getInstance();
+        List<String> rooms = storage.getRoomNames();
+        for (String room : rooms) {
+            List<Participant> participants = storage.getParticipants(room);
+            VectorClock vc = storage.getCurrentVectorClock(room);
+            List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
+            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, RoomStateManager.getInstance().getUsername(), vc, unsentMessages);
+
+            String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
+            participants.stream()
+                    .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
+                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, false, message)
+                            .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
+                    );
+        }
+
     }
 }

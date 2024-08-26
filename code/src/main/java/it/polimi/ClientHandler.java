@@ -65,7 +65,7 @@ public class ClientHandler implements Runnable {
                 setupStreams();
                 System.out.println("Reconnected to server");
                 state.setConnected(true);
-                update_chats();
+                Main.startup(ip + ":" + port);
                 run(); // Restart handling messages once reconnected
                 break;
             } catch (IOException e) {
@@ -78,26 +78,6 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-
-    public static void update_chats() {
-        StableStorage storage = StableStorage.getInstance();
-        List<String> rooms = storage.getRoomNames();
-        for (String room : rooms) {
-            List<Participant> participants = storage.getParticipants(room);
-            VectorClock vc = storage.getCurrentVectorClock(room);
-            System.out.println("prendo unsentmex chat"+room);
-            List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
-            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, RoomStateManager.getInstance().getUsername(), vc, unsentMessages);
-
-            String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
-            participants.stream()
-                    .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
-                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, false, message)
-                            .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
-                    );
-        }
-    }
-
 
     private void disconnect() {
         try {

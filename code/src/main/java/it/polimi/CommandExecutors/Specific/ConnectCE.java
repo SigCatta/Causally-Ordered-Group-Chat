@@ -10,7 +10,6 @@ public class ConnectCE implements CommandExecutor {
     public void execute() {
         new Thread(() -> Main.startListening(RoomStateManager.getInstance().getIp(), RoomStateManager.getInstance().getPort(), RoomStateManager.getInstance().getUsername())).start();
         new Thread(() -> Main.startup(RoomStateManager.getInstance().getIp()+":"+ RoomStateManager.getInstance().getPort())).start();
-        ClientHandler.update_chats();
         RoomStateManager.getInstance().setConnected(true);
     }
 }
