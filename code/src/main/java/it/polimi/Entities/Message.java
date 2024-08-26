@@ -10,12 +10,7 @@ public record Message(String text, VectorClock vectorClock) implements Serializa
         text = text.replace("\n", " ");
     }
 
-    public boolean sameMessage(Message m1,Message m2){
-        if(m1.text()==m1.text()){
-            if(m1.vectorClock().equals(m2.vectorClock())){
-                return true;
-            }
-        }
-        return false;
+    public boolean sameMessage(Message m1, Message m2) {
+        return m1.text().equals(m2.text()) && m1.vectorClock().equals(m2.vectorClock());
     }
 }

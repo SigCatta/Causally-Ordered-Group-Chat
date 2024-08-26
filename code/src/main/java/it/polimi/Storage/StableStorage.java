@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 public class StableStorage {
@@ -18,6 +19,7 @@ public class StableStorage {
 
     private final StorageReader sr;
     private static StableStorage instance = null;
+    private final Semaphore sem = new Semaphore(1);
 
     private StableStorage() {
         this.sw = new StorageWriter();
@@ -111,17 +113,22 @@ public class StableStorage {
 
     // DELIVERED - Saves a message to stable storage, along with the vector clock
     public void deliverMessage(String roomId, Message message) {
+        waitForAccess();
         VectorClock currentVC = getCurrentVectorClock(roomId);
         VectorClock newVC = message.vectorClock();
 
-        sw.append(Paths.get(roomId, "vector_clocks.txt"), newVC.toString() + '\n');
-        sw.append(Paths.get(roomId, "messages.txt"), message.text() + '\n');
-        sw.overwrite(Paths.get(roomId, "last_vc.txt"), currentVC.merge(newVC).toString());
+        if (sr.getMessages(roomId).stream().noneMatch(m -> m.sameMessage(m, message))) {
+            sw.append(Paths.get(roomId, "vector_clocks.txt"), newVC.toString() + '\n');
+            sw.append(Paths.get(roomId, "messages.txt"), message.text() + '\n');
+            sw.overwrite(Paths.get(roomId, "last_vc.txt"), currentVC.merge(newVC).toString());
+        }
+        sem.release();
     }
 
     // DELAYED - saves a message to stable storage, along with the vector clock
     // messages are stored in order based on their vector clocks
     public void delayMessage(String roomId, Message message) {
+        waitForAccess();
         List<Message> messages = sr.getDelayedMessages(roomId);
         StringBuilder vcSB = new StringBuilder();
         StringBuilder msgSB = new StringBuilder();
@@ -155,12 +162,15 @@ public class StableStorage {
 
         sw.overwrite(Paths.get(roomId, "delayed", "vector_clocks.txt"), vcSB.toString());
         sw.overwrite(Paths.get(roomId, "delayed", "messages.txt"), msgSB.toString());
+        sem.release();
     }
 
     // Stores an unsent message to stable storage
     public void storeUnsentMessage(String roomId, Message message) {
+        waitForAccess();
         sw.append(Paths.get(roomId, "unsent_msg.txt"), message.text() + '\n');
         sw.append(Paths.get(roomId, "unsent_vc.txt"), message.vectorClock().toString() + '\n');
+        sem.release();
     }
 
     // Returns a list of all unsent messages
@@ -185,7 +195,7 @@ public class StableStorage {
             Message msg = messages.getFirst();
             VectorClock newVC = msg.vectorClock();
             if (newVC.canBeDeliveredAfter(vc)) {
-                if(!chat.contains(msg)){
+                if (!chat.contains(msg)) {
                     deliverMessage(roomId, msg);
                 }
                 vc = newVC;
@@ -304,6 +314,14 @@ public class StableStorage {
         try {
             Files.deleteIfExists(getBackupPath());
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void waitForAccess() {
+        try {
+            sem.acquire();
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

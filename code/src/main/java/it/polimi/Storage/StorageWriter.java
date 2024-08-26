@@ -103,7 +103,6 @@ class StorageWriter {
     }
 
     // Creates the all directories needed in the PATH constant
-    // TODO -> should be called in the main function, after RoomStateManager.getInstance().getUsername() is initialized, then never again...
     private void createBaseDirectories() {
         Path chatRoot = Paths.get(System.getProperty("user.home"), "chat_ss");
 
