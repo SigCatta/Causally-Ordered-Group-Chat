@@ -247,6 +247,7 @@ public class Main {
             List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
             UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, RoomStateManager.getInstance().getUsername(), vc, unsentMessages);
 
+
             String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
             participants.stream()
                     .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))

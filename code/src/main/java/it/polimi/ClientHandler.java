@@ -1,23 +1,13 @@
 package it.polimi;
 
-import it.polimi.Entities.Participant;
-import it.polimi.Entities.VectorClock;
-import it.polimi.Message.HelloMessage;
+
 import it.polimi.Message.Message;
-import it.polimi.Message.UpdateChatRequestMessage;
-import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.RoomStateManager;
-import it.polimi.Storage.ReplicationManager;
-import it.polimi.Storage.StableStorage;
 
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ClientHandler implements Runnable {
     private volatile Socket clientSocket;

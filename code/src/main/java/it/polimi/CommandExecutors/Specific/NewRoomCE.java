@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class NewRoomCE implements CommandExecutor {
     @Override
     public void execute() {
-        if (RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance()) {
+        if (RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance() && RoomStateManager.getInstance().getConnected()) {
             Scanner scanner = new Scanner(System.in);
             String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
 

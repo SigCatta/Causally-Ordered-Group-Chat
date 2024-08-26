@@ -8,7 +8,7 @@ import it.polimi.States.RoomStateManager;
 public class DisconnectCE implements CommandExecutor {
     @Override
     public void execute() {
-       // new Thread(LastWill::execute);
+        LastWill.execute();
         Main.stopListening();
         RoomStateManager.getInstance().setConnected(false);
     }
