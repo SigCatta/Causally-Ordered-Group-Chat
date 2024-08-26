@@ -171,16 +171,16 @@ public class Main {
         // Restore backup data if present
         sendBackups();
 
-        // sends its ip to other node participants
-        new JoinMessage(state.getUsername(), myEndpoint)
-                .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(state.getUsername().charAt(0) - 'a')));
-
         // Check if any of my rooms have been deleted
         StableStorage.getInstance().getRoomNames()
                 .forEach(r ->
                         new CheckForDeletionMessage(r, myEndpoint)
                                 .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(r.charAt(0) - 'a')))
                 );
+
+        // sends its ip to other node participants
+        new JoinMessage(state.getUsername(), myEndpoint)
+                .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(state.getUsername().charAt(0) - 'a')));
 
         update_chats();
 

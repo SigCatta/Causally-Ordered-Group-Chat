@@ -24,12 +24,14 @@ public class UserAddressResponseMessage extends Message implements Serializable 
 
     @Override
     public void process(RoomState state) {
-        StableStorage.getInstance().updateParticipantIp(roomName, participant);
-        if (creatingRoom) {
-            new NewRoomMessage(roomName, StableStorage.getInstance().getParticipants(roomName))
-                    .sendMessage(participant);
-        } else {
-            message.sendMessage(participant);
+        if (StableStorage.getInstance().getRoomNames().contains(roomName)) { // if the room does not exist, there is no user ip to update
+            StableStorage.getInstance().updateParticipantIp(roomName, participant);
+            if (creatingRoom) {
+                new NewRoomMessage(roomName, StableStorage.getInstance().getParticipants(roomName))
+                        .sendMessage(participant);
+            } else {
+                message.sendMessage(participant);
+            }
         }
     }
 }
