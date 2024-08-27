@@ -4,6 +4,7 @@ import it.polimi.Entities.Participant;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.NodeHistoryManager;
 import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
@@ -68,6 +69,8 @@ public class RingUpdateMessage extends Message implements Serializable {
                     .entrySet().stream()
                     .filter(e -> !ReplicationManager.getInstance().getUserNodes().contains(e.getValue()))
                     .forEach(e -> this.sendMessage(new Participant(0, "-", e.getValue())));
+
+        NodeHistoryManager.getInstance().getS_user().release();
     }
 
     public static void broadcast(Message message) {
