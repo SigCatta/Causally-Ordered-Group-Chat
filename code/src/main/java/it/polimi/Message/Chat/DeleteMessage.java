@@ -1,5 +1,6 @@
-package it.polimi.Message;
+package it.polimi.Message.Chat;
 
+import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 
 import java.io.Serializable;

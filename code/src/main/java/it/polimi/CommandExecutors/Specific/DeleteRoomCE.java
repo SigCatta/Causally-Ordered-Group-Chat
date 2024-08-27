@@ -2,9 +2,8 @@ package it.polimi.CommandExecutors.Specific;
 
 import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Participant;
-import it.polimi.Message.DeleteMessage;
-import it.polimi.Message.DeleteMessageNode;
-import it.polimi.Message.NewRoomNodeMessage;
+import it.polimi.Message.Chat.DeleteMessage;
+import it.polimi.Message.RoomNodes.DeleteMessageNode;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.HomeState;
 import it.polimi.States.InRoomState;
@@ -12,12 +11,7 @@ import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class DeleteRoomCE implements CommandExecutor {
     @Override

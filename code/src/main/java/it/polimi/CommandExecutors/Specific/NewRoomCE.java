@@ -2,7 +2,7 @@ package it.polimi.CommandExecutors.Specific;
 
 import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Participant;
-import it.polimi.Message.NewRoomNodeMessage;
+import it.polimi.Message.RoomNodes.NewRoomNodeMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.HomeState;
 import it.polimi.States.RoomStateManager;

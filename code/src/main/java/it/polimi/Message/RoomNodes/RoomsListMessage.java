@@ -2,7 +2,7 @@ package it.polimi.Message.RoomNodes;
 
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Message;
-import it.polimi.Message.UpdateChatRequestMessage;
+import it.polimi.Message.Chat.UpdateChatRequestMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.RoomState;
 import it.polimi.States.RoomStateManager;

@@ -4,7 +4,7 @@ import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
-import it.polimi.Message.ChatMessage;
+import it.polimi.Message.Chat.ChatMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.InRoomState;
 import it.polimi.States.RoomStateManager;

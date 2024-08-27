@@ -1,17 +1,15 @@
 package it.polimi.States;
 
-import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.*;
+import it.polimi.Message.Chat.*;
+import it.polimi.Message.RoomNodes.DeleteMessageNode;
+import it.polimi.Message.RoomNodes.NewRoomNodeMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 
 public class HomeState implements RoomState{

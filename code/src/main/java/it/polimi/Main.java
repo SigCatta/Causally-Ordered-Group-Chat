@@ -10,7 +10,7 @@ import it.polimi.Message.Replication.RoomNodeProposalMessage;
 import it.polimi.Message.Replication.UserNodeProposalMessage;
 import it.polimi.Message.RoomNodes.CheckForDeletionMessage;
 import it.polimi.Message.RoomNodes.GetMyRoomsMessage;
-import it.polimi.Message.UpdateChatRequestMessage;
+import it.polimi.Message.Chat.UpdateChatRequestMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Message.UserNodes.JoinMessage;
 import it.polimi.States.RoomStateManager;

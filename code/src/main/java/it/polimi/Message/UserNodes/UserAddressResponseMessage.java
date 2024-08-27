@@ -2,7 +2,7 @@ package it.polimi.Message.UserNodes;
 
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Message;
-import it.polimi.Message.NewRoomMessage;
+import it.polimi.Message.Chat.NewRoomMessage;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.StableStorage;
 
