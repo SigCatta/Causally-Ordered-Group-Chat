@@ -2,6 +2,8 @@ package it.polimi.Message.Partitions;
 
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
+import it.polimi.Storage.NodeHistoryManager;
+import it.polimi.Storage.ReplicationManager;
 
 
 import java.io.Serializable;
@@ -21,7 +23,7 @@ public class SendListUserNodesMessage extends Message implements Serializable {
     @Override
     public void process(RoomState state) {
         synchronized (this){
-
+            NodeHistoryManager.getInstance().MergeLists(ReplicationManager.getInstance().getUserNodes(), UserNodes);
         }
     }
 }

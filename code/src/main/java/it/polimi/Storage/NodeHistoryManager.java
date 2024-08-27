@@ -5,6 +5,7 @@ import it.polimi.Message.Partitions.GetListUserNodesMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.RoomStateManager;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -95,6 +96,7 @@ public class NodeHistoryManager {
         int i = 0;
         for( String node : myNodes){
             if(!yourNodes.get(i).equals(node)){
+
                 ReplicationManager.getInstance().updateUserNode(yourNodes.get(i), i);
             }
             i++;
