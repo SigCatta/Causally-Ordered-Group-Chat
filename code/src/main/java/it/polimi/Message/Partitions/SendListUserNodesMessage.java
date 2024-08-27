@@ -3,6 +3,7 @@ package it.polimi.Message.Partitions;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -19,6 +20,8 @@ public class SendListUserNodesMessage extends Message implements Serializable {
     }
     @Override
     public void process(RoomState state) {
+        synchronized (this){
 
+        }
     }
 }

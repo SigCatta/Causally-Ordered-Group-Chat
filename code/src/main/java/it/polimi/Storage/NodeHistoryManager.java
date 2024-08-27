@@ -6,16 +6,14 @@ import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.RoomStateManager;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
 public class NodeHistoryManager {
     private final Set<String> roomNodes;
     private final Set<String> userNodes;
-    private final NodeHistoryManager instance;
-
-    private Set<String> listRoomNodes;
-    private Set<String> listUserNodes;
+    private static NodeHistoryManager instance;
 
     private Semaphore roomNodesSemaphore = new Semaphore(1);
 
@@ -25,7 +23,7 @@ public class NodeHistoryManager {
         this.instance = new NodeHistoryManager();
     }
 
-    public NodeHistoryManager getInstance() {
+    public static NodeHistoryManager getInstance() {
         if (instance == null) return new NodeHistoryManager();
         return instance;
     }
@@ -42,13 +40,6 @@ public class NodeHistoryManager {
         this.roomNodes.addAll(roomNodes);
     }
 
-    public Set<String> getListRoomNodes() {
-        return listRoomNodes;
-    }
-
-    public void setListRoomNodes(Set<String> listRoomNodes) {
-        this.listRoomNodes = listRoomNodes;
-    }
 
     public void addRoomNode(String node) {
         roomNodes.add(node);
@@ -70,13 +61,6 @@ public class NodeHistoryManager {
         this.userNodes.addAll(userNodes);
     }
 
-    public Set<String> getListUserNodes() {
-        return listUserNodes;
-    }
-
-    public void setListUserNodes(Set<String> listUserNodes) {
-        this.listUserNodes = listUserNodes;
-    }
 
     public void addUserNode(String node) {
         userNodes.add(node);
@@ -96,6 +80,24 @@ public class NodeHistoryManager {
             userNodes.stream().filter(node -> !ReplicationManager.getInstance().getUserNodes().contains(node))
                     .forEach(node -> new GetListUserNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
                             .sendMessage(new Participant(0, "-", node)));
+        }
+    }
+
+    public void resolveRoomNodesPartition() {
+        // checking if I am the leader to solve the partition
+        if (ReplicationManager.getInstance().getRoomNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
+           /* roomNodes.stream().filter(node -> !ReplicationManager.getInstance().getRoomNodes().contains(node))
+                    .forEach();*/
+        }
+    }
+
+    public void MergeLists(List<String> myNodes, List<String> yourNodes) {
+        int i = 0;
+        for( String node : myNodes){
+            if(!yourNodes.get(i).equals(node)){
+                ReplicationManager.getInstance().updateUserNode(yourNodes.get(i), i);
+            }
+            i++;
         }
     }
 
