@@ -2,11 +2,9 @@ package it.polimi.Storage;
 
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Partitions.GetListUserNodesMessage;
-import it.polimi.Message.Partitions.ReleaseUserNodeRoleMessage;
-import it.polimi.Message.UserNodes.GetUserAddressMessage;
+import it.polimi.Message.Replication.RingUpdateMessage;
 import it.polimi.States.RoomStateManager;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,6 +16,8 @@ public class NodeHistoryManager {
     private static NodeHistoryManager instance;
 
     private Boolean solvingPartition;
+
+    private final Semaphore s_user = new Semaphore(1);
 
     private NodeHistoryManager() {
         this.roomNodes = new HashSet<>();
@@ -72,6 +72,10 @@ public class NodeHistoryManager {
         userNodes.remove(node);
     }
 
+    public Semaphore getS_user() {
+        return s_user;
+    }
+
     public Boolean getSolvingPartition() {
         return solvingPartition;
     }
@@ -94,15 +98,14 @@ public class NodeHistoryManager {
         }
     }
 
-    public void MergeLists(List<String> myNodes, List<String> yourNodes) {
-        int i = 0;
-        for(String node : myNodes){
-            if(!yourNodes.get(i).equals(node)){
-                new ReleaseUserNodeRoleMessage(yourNodes.get(i)).sendMessage(new Participant(0, "-", node));
-                ReplicationManager.getInstance().updateUserNode(yourNodes.get(i), i);
-            }
-            i++;
-        }
+    public void MergeLists(List<String> newNodes) throws InterruptedException {
+        ReplicationManager.getInstance().getUserNodes().stream().forEach(node -> new RingUpdateMessage(null, newNodes).sendMessage(new Participant(0, "-", node)));
+        ReplicationManager.getInstance().setUserNodes(newNodes);
+        solvingPartition = false;
+        s_user.release();
     }
 
+
 }
+
+

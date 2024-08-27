@@ -22,8 +22,12 @@ public class SendListUserNodesMessage extends Message implements Serializable {
     }
     @Override
     public void process(RoomState state) {
-        synchronized (this){
-            NodeHistoryManager.getInstance().MergeLists(ReplicationManager.getInstance().getUserNodes(), UserNodes);
+        try{
+            if(NodeHistoryManager.getInstance().getS_user().tryAcquire()){
+                NodeHistoryManager.getInstance().MergeLists(UserNodes);
+            }
+        }catch(Exception e){
+
         }
     }
 }
