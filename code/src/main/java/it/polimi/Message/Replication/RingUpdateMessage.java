@@ -71,6 +71,7 @@ public class RingUpdateMessage extends Message implements Serializable {
                     .forEach(e -> this.sendMessage(new Participant(0, "-", e.getValue())));
 
         NodeHistoryManager.getInstance().getS_user().release();
+        NodeHistoryManager.getInstance().getS_room().release();
     }
 
     public static void broadcast(Message message) {

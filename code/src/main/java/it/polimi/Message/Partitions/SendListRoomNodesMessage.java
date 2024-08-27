@@ -2,6 +2,7 @@ package it.polimi.Message.Partitions;
 
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
+import it.polimi.Storage.NodeHistoryManager;
 
 import java.util.List;
 import java.io.Serializable;
@@ -15,6 +16,12 @@ public class SendListRoomNodesMessage extends Message implements Serializable {
     }
     @Override
     public void process(RoomState state) {
+        try{
+            if(NodeHistoryManager.getInstance().getS_room().tryAcquire()){
+                NodeHistoryManager.getInstance().newRoomList(roomNodes);
+            }
+        }catch(Exception e){
 
+        }
     }
 }

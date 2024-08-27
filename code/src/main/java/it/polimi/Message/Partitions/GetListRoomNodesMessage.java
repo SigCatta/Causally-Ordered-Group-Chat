@@ -28,6 +28,9 @@ public class GetListRoomNodesMessage extends Message implements Serializable {
                     SendListRoomNodesMessage message = new SendListRoomNodesMessage(ReplicationManager.getInstance().getRoomNodes());
                     message.sendMessage(new Participant(0, "-", sender));
                 }
+            }else{
+                String leader = ReplicationManager.getInstance().getRoomNodes().get(0);
+                this.sendMessage(new Participant(0, "-", leader));
             }
         }
     }
