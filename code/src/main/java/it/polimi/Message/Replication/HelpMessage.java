@@ -7,7 +7,6 @@ import it.polimi.States.RoomStateManager;
 import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,14 +59,11 @@ public class HelpMessage extends Message implements Serializable {
                 }
 
                 // tell other ring nodes about the change
-                List<String> newRoomNodes = new ArrayList<>(ReplicationManager.getInstance().getRoomNodes());
+                List<String> newRoomNodes = ReplicationManager.getInstance().getRoomNodes();
                 for (int i = roomNodes.indexOf(myEntry); i < roomNodes.indexOf(myEntry) + count / 2; i++) {
                     newRoomNodes.set(i, ip + ':' + port);
                 }
-                Message message = new RingUpdateMessage(newRoomNodes, null);
-                newRoomNodes.stream()
-                        .distinct()
-                        .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));
+                RingUpdateMessage.broadcast(new RingUpdateMessage(newRoomNodes, null));
 
                 // remove the first half of the letters from my map ~ this is done at the very end to prevent losing data
                 mapToSend.keySet().forEach(
@@ -105,14 +101,11 @@ public class HelpMessage extends Message implements Serializable {
                 }
 
                 // tell other ring nodes about the change
-                List<String> newUserNodes = new ArrayList<>(ReplicationManager.getInstance().getUserNodes());
+                List<String> newUserNodes = ReplicationManager.getInstance().getUserNodes();
                 for (int i = userNodes.indexOf(myEntry); i < userNodes.indexOf(myEntry) + count / 2; i++) {
                     newUserNodes.set(i, ip + ':' + port);
                 }
-                Message message = new RingUpdateMessage(null, newUserNodes);
-                newUserNodes.stream()
-                        .distinct()
-                        .forEach(ip -> message.sendMessage(new Participant(0, "-", ip)));
+                RingUpdateMessage.broadcast(new RingUpdateMessage(null, newUserNodes));
 
                 // remove the first half of the letters from my map ~ this is done at the very end to prevent losing data
                 mapToSend.keySet().forEach(

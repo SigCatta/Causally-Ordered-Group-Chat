@@ -1,7 +1,9 @@
 package it.polimi.Message.RoomNodes;
 
+import it.polimi.Entities.Participant;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
+import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
 import java.util.List;
@@ -21,8 +23,17 @@ public class NewRoomNodeMessage extends Message implements Serializable {
     public List<String> getParticipants() {
         return participants;
     }
+
     @Override
     public void process(RoomState state) {
         state.handle(this);
+    }
+
+    @Override
+    public void handleException(Participant participant) {
+        substituteFailedRoomNode(
+                ReplicationManager.getInstance().getRoomNodes()
+                        .get(participant.name().charAt(0) - 'a')
+        );
     }
 }

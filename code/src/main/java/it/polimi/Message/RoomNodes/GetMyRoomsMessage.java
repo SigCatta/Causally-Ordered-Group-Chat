@@ -31,4 +31,12 @@ public class GetMyRoomsMessage extends Message implements Serializable {
             new RoomsListMessage(roomsFound).sendMessage(new Participant(0, "-", endpoint));
         }
     }
+
+    @Override
+    public void handleException(Participant participant) {
+        substituteFailedRoomNode(
+                ReplicationManager.getInstance().getRoomNodes()
+                        .get(participant.name().charAt(0) - 'a')
+        );
+    }
 }

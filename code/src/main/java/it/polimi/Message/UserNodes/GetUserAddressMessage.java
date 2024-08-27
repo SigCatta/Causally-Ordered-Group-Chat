@@ -32,4 +32,12 @@ public class GetUserAddressMessage extends Message implements Serializable {
                         .sendMessage(new Participant(0, "-", endpoint));
             }
     }
+
+    @Override
+    public void handleException(Participant participant) {
+        substituteFailedUserNode(
+                ReplicationManager.getInstance().getUserNodes()
+                        .get(participant.name().charAt(0) - 'a')
+        );
+    }
 }

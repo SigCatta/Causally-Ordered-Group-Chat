@@ -3,14 +3,13 @@ package it.polimi;
 import it.polimi.CommandExecutors.CommandExecutorFactory;
 import it.polimi.Entities.DataContainer;
 import it.polimi.Entities.Participant;
-import it.polimi.Entities.VectorClock;
+import it.polimi.Message.Chat.UpdateChatRequestMessage;
 import it.polimi.Message.Replication.HelpMessage;
 import it.polimi.Message.Replication.RingDataRequestMessage;
 import it.polimi.Message.Replication.RoomNodeProposalMessage;
 import it.polimi.Message.Replication.UserNodeProposalMessage;
 import it.polimi.Message.RoomNodes.CheckForDeletionMessage;
 import it.polimi.Message.RoomNodes.GetMyRoomsMessage;
-import it.polimi.Message.Chat.UpdateChatRequestMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Message.UserNodes.JoinMessage;
 import it.polimi.States.RoomStateManager;
@@ -71,8 +70,12 @@ public class Main {
         } else if (!choice.equals("y")) {
             throw new RuntimeException("Invalid choice");
         } else {
-            if (StableStorage.getInstance().getBackupData() != null)
-                throw new RuntimeException("Backup data found. Please restore it before creating a new network.");
+            if (StableStorage.getInstance().getBackupData() != null) { // if there is backup data, restore it
+                DataContainer backup = StableStorage.getInstance().getBackupData();
+                ReplicationManager.getInstance().getUsersMap().putAll(backup.usersMap());
+                ReplicationManager.getInstance().getRoomsMap().putAll(backup.roomsMap());
+                ReplicationManager.getInstance().getDeletedRooms().addAll(backup.deletedRooms());
+            }
 
             // the node who creates the network is responsible for everything in both rings
             String entry = ip + ':' + port;
@@ -242,22 +245,22 @@ public class Main {
     }
 
     private static void update_chats() {
-        StableStorage storage = StableStorage.getInstance();
-        List<String> rooms = storage.getRoomNames();
-        for (String room : rooms) {
-            List<Participant> participants = storage.getParticipants(room);
-            VectorClock vc = storage.getCurrentVectorClock(room);
-            List<it.polimi.Entities.Message> unsentMessages = storage.getUnsentMessages(room);
-            UpdateChatRequestMessage message = new UpdateChatRequestMessage(room, RoomStateManager.getInstance().getUsername(), vc, unsentMessages);
-
-
-            String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
-            participants.stream()
-                    .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
-                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, false, message)
-                            .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
+        StableStorage ss = StableStorage.getInstance();
+        ss.getRoomNames()
+                .forEach(room -> {
+                    UpdateChatRequestMessage message = new UpdateChatRequestMessage(
+                            room,
+                            RoomStateManager.getInstance().getUsername(), // my username
+                            ss.getCurrentVectorClock(room), // my current vector clock
+                            ss.getUnsentMessages(room) // all unsent messages
                     );
-        }
 
+                    String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
+                    ss.getParticipants(room).stream()
+                            .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
+                            .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, false, message)
+                                    .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
+                            );
+                });
     }
 }

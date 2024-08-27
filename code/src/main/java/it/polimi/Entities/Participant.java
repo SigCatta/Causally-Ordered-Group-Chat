@@ -1,7 +1,6 @@
 package it.polimi.Entities;
 
 import java.io.Serializable;
-import java.util.List;
 
 public record Participant(int index, String name, String ipAddress) implements Serializable {
     public Participant {

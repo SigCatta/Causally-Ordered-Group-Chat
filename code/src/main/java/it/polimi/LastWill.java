@@ -53,11 +53,7 @@ public class LastWill {
                     roomNodes.set(i, saviour);
             }
 
-            RingUpdateMessage ringUpdateMessage = new RingUpdateMessage(roomNodes, null);
-            roomNodes.stream()
-                    .distinct()
-                    .filter(ip -> !ip.equals(myEndpoint))
-                    .forEach(ip -> ringUpdateMessage.sendMessage(new Participant(0, "-", ip)));
+            RingUpdateMessage.broadcast(new RingUpdateMessage(roomNodes, null));
         }
 
         // If I am a user node, send the data
@@ -80,11 +76,7 @@ public class LastWill {
                     userNodes.set(i, saviour);
             }
 
-            RingUpdateMessage ringUpdateMessage = new RingUpdateMessage(null, userNodes);
-            userNodes.stream()
-                    .distinct()
-                    .filter(ip -> !ip.equals(myEndpoint))
-                    .forEach(ip -> ringUpdateMessage.sendMessage(new Participant(0, "-", ip)));
+            RingUpdateMessage.broadcast(new RingUpdateMessage(null, userNodes));
         }
 
     }

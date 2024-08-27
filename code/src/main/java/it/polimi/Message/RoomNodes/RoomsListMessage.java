@@ -26,7 +26,7 @@ public class RoomsListMessage extends Message implements Serializable {
     public void process(RoomState state) {
         List<String> roomsPresent = StableStorage.getInstance().getRoomNames();
         roomsFound.forEach((room, users) -> {
-            if (!roomsPresent.contains(room)) {
+            if (!roomsPresent.contains(room)) { // add new rooms
                 List<Participant> participants = new ArrayList<>();
                 for (int i = 0; i < users.size(); i++) {
                     participants.add(new Participant(i, users.get(i), null));

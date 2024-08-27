@@ -1,5 +1,6 @@
 package it.polimi.Message.Replication;
 
+import it.polimi.Entities.Participant;
 import it.polimi.LastWill;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
@@ -35,7 +36,7 @@ public class LastWillMessage extends Message implements Serializable {
     }
 
     @Override
-    public void handleException(){
+    public void handleException(Participant p){
         LastWill.saveDataToDisk();
     }
 }
