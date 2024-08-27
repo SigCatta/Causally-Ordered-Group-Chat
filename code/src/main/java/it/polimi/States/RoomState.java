@@ -5,7 +5,7 @@ import it.polimi.Message.Chat.ChatMessage;
 import it.polimi.Message.Chat.DeleteMessage;
 import it.polimi.Message.Chat.NewRoomMessage;
 import it.polimi.Message.Chat.UpdateChatRequestMessage;
-import it.polimi.Message.RoomNodes.DeleteMessageNode;
+import it.polimi.Message.RoomNodes.DeleteNodeMessage;
 import it.polimi.Message.RoomNodes.NewRoomNodeMessage;
 
 public interface RoomState{
@@ -15,5 +15,5 @@ public interface RoomState{
     void handle(ChatMessage message);
     void handle(UpdateChatRequestMessage message);
     void handle(NewRoomNodeMessage message);
-    void handle(DeleteMessageNode message);
+    void handle(DeleteNodeMessage message);
 }

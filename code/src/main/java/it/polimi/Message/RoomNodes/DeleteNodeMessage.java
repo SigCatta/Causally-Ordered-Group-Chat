@@ -5,10 +5,10 @@ import it.polimi.States.RoomState;
 
 import java.io.Serializable;
 
-public class DeleteMessageNode extends Message implements Serializable {
+public class DeleteNodeMessage extends Message implements Serializable {
     private final String roomName;
 
-    public DeleteMessageNode (String roomName){
+    public DeleteNodeMessage(String roomName){
         super("You have a room to delete!");
         this.roomName = roomName;
     }

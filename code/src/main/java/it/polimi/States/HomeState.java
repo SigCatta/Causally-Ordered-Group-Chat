@@ -4,7 +4,7 @@ import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.*;
 import it.polimi.Message.Chat.*;
-import it.polimi.Message.RoomNodes.DeleteMessageNode;
+import it.polimi.Message.RoomNodes.DeleteNodeMessage;
 import it.polimi.Message.RoomNodes.NewRoomNodeMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Storage.ReplicationManager;
@@ -84,7 +84,7 @@ public class HomeState implements RoomState{
     }
 
     @Override
-    public void handle(DeleteMessageNode message) {
+    public void handle(DeleteNodeMessage message) {
         ReplicationManager.getInstance().deleteRoom(message.getRoomName());
     }
 

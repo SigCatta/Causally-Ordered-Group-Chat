@@ -3,7 +3,7 @@ package it.polimi.CommandExecutors.Specific;
 import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Chat.DeleteMessage;
-import it.polimi.Message.RoomNodes.DeleteMessageNode;
+import it.polimi.Message.RoomNodes.DeleteNodeMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.HomeState;
 import it.polimi.States.InRoomState;
@@ -25,7 +25,7 @@ public class DeleteRoomCE implements CommandExecutor {
 
             List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
             String address = roomNodes.get(x);
-            DeleteMessageNode m = new DeleteMessageNode(roomName);
+            DeleteNodeMessage m = new DeleteNodeMessage(roomName);
             m.sendMessage(new Participant(0,"x",address));
 
             RoomStateManager.getInstance().setCurrentState(HomeState.getInstance());
