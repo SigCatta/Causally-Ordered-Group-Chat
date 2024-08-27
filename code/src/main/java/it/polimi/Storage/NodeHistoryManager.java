@@ -1,6 +1,7 @@
 package it.polimi.Storage;
 
 import it.polimi.Entities.Participant;
+import it.polimi.Message.Partitions.GetListRoomNodesMessage;
 import it.polimi.Message.Partitions.GetListUserNodesMessage;
 import it.polimi.Message.Replication.RingUpdateMessage;
 import it.polimi.States.RoomStateManager;
@@ -18,6 +19,7 @@ public class NodeHistoryManager {
     private Boolean solvingPartition;
 
     private final Semaphore s_user = new Semaphore(1);
+    private final Semaphore s_room = new Semaphore(1);
 
     private NodeHistoryManager() {
         this.roomNodes = new HashSet<>();
@@ -49,6 +51,9 @@ public class NodeHistoryManager {
 
     public void removeRoomNode(String node) {
         roomNodes.remove(node);
+    }
+    public Semaphore getS_room() {
+        return s_room;
     }
 
     //
@@ -93,16 +98,24 @@ public class NodeHistoryManager {
     public void resolveRoomNodesPartition() {
         // checking if I am the leader to solve the partition
         if (ReplicationManager.getInstance().getRoomNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
-           /* roomNodes.stream().filter(node -> !ReplicationManager.getInstance().getRoomNodes().contains(node))
-                    .forEach();*/
+            roomNodes.stream().filter(node -> !ReplicationManager.getInstance().getRoomNodes().contains(node))
+                    .forEach(node -> new GetListRoomNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
+                            .sendMessage(new Participant(0, "-", node)));
         }
     }
 
-    public void MergeLists(List<String> newNodes) throws InterruptedException {
+    public void newUserList(List<String> newNodes) throws InterruptedException {
         ReplicationManager.getInstance().getUserNodes().stream().forEach(node -> new RingUpdateMessage(null, newNodes).sendMessage(new Participant(0, "-", node)));
         ReplicationManager.getInstance().setUserNodes(newNodes);
         solvingPartition = false;
         s_user.release();
+    }
+
+    public void newRoomList(List<String> newNodes) throws InterruptedException {
+        ReplicationManager.getInstance().getRoomNodes().stream().forEach(node -> new RingUpdateMessage(newNodes, null).sendMessage(new Participant(0, "-", node)));
+        ReplicationManager.getInstance().setRoomNodes(newNodes);
+        solvingPartition = false;
+        s_room.release();
     }
 
 

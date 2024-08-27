@@ -24,7 +24,7 @@ public class SendListUserNodesMessage extends Message implements Serializable {
     public void process(RoomState state) {
         try{
             if(NodeHistoryManager.getInstance().getS_user().tryAcquire()){
-                NodeHistoryManager.getInstance().MergeLists(UserNodes);
+                NodeHistoryManager.getInstance().newUserList(UserNodes);
             }
         }catch(Exception e){
 
