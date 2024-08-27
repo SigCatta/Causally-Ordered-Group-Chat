@@ -6,14 +6,14 @@ import it.polimi.States.RoomState;
 import java.io.Serializable;
 
 public class ReleaseUserNodeRoleMessage extends Message implements Serializable {
-    public ReleaseUserNodeRoleMessage() {
-
+    private final String endPoint;
+    public ReleaseUserNodeRoleMessage(String endPoint) {
         super("releasing user node role");
+        this.endPoint = endPoint;
     }
-
 
     @Override
     public void process(RoomState state) {
-
+        // sends your data to endPoint
     }
 }

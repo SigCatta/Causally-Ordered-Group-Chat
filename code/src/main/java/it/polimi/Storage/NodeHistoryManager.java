@@ -2,6 +2,7 @@ package it.polimi.Storage;
 
 import it.polimi.Entities.Participant;
 import it.polimi.Message.Partitions.GetListUserNodesMessage;
+import it.polimi.Message.Partitions.ReleaseUserNodeRoleMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.RoomStateManager;
 
@@ -16,7 +17,7 @@ public class NodeHistoryManager {
     private final Set<String> userNodes;
     private static NodeHistoryManager instance;
 
-    private Semaphore roomNodesSemaphore = new Semaphore(1);
+    private Boolean solvingPartition;
 
     private NodeHistoryManager() {
         this.roomNodes = new HashSet<>();
@@ -71,12 +72,13 @@ public class NodeHistoryManager {
         userNodes.remove(node);
     }
 
-    public Semaphore getRoomNodesSemaphore() {
-        return roomNodesSemaphore;
+    public Boolean getSolvingPartition() {
+        return solvingPartition;
     }
 
     public void resolveUserNodesPartition() {
         // checking if I am the leader to solve the partition
+        solvingPartition = true;
         if (ReplicationManager.getInstance().getUserNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
             userNodes.stream().filter(node -> !ReplicationManager.getInstance().getUserNodes().contains(node))
                     .forEach(node -> new GetListUserNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
@@ -94,9 +96,9 @@ public class NodeHistoryManager {
 
     public void MergeLists(List<String> myNodes, List<String> yourNodes) {
         int i = 0;
-        for( String node : myNodes){
+        for(String node : myNodes){
             if(!yourNodes.get(i).equals(node)){
-
+                new ReleaseUserNodeRoleMessage(yourNodes.get(i)).sendMessage(new Participant(0, "-", node));
                 ReplicationManager.getInstance().updateUserNode(yourNodes.get(i), i);
             }
             i++;
