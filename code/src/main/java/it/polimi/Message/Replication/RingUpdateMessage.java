@@ -8,6 +8,9 @@ import it.polimi.Storage.ReplicationManager;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class RingUpdateMessage extends Message implements Serializable {
     private final List<String> roomNodes;
@@ -25,11 +28,18 @@ public class RingUpdateMessage extends Message implements Serializable {
 
         if (roomNodes != null) {
             if (!roomNodes.contains(myEndpoint) && ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint)) { // I have been substituted, I send my data to the new node
-                int myFirst = ReplicationManager.getInstance().getRoomNodes().indexOf(myEndpoint);
-                new RoomNodeProposalMessage(
-                        ReplicationManager.getInstance().getRoomsMap(),
-                        ReplicationManager.getInstance().getDeletedRooms()
-                ).sendMessage(new Participant(0, "-", roomNodes.get(myFirst)));
+                IntStream.range(0, ReplicationManager.getInstance().getRoomNodes().size())
+                        .filter(i -> ReplicationManager.getInstance().getRoomNodes().get(i).equals(myEndpoint))
+                        .forEach(i ->
+                                new RoomNodeProposalMessage(
+                                        ReplicationManager.getInstance().getRoomsMap().entrySet().stream()
+                                                .filter(e -> e.getKey().charAt(0) - 'a' == i)
+                                                .collect(ConcurrentHashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), ConcurrentHashMap::putAll),
+                                        ReplicationManager.getInstance().getDeletedRooms().stream().
+                                                filter(r -> r.charAt(0) - 'a' == i)
+                                                .collect(Collectors.toSet())
+                                ).sendMessage(new Participant(0, "-", roomNodes.get(i)))
+                        );
             }
             for (int i = 0; i < roomNodes.size(); i++) {
                 if (roomNodes.get(i) != null) ReplicationManager.getInstance().updateRoomNode(roomNodes.get(i), i);
@@ -38,10 +48,15 @@ public class RingUpdateMessage extends Message implements Serializable {
 
         if (userNodes != null) {
             if (!userNodes.contains(myEndpoint) && ReplicationManager.getInstance().getUserNodes().contains(myEndpoint)) { // I have been substituted, I send my data to the new node
-                int myFirst = ReplicationManager.getInstance().getUserNodes().indexOf(myEndpoint);
-                new UserNodeProposalMessage(
-                        ReplicationManager.getInstance().getUsersMap()
-                ).sendMessage(new Participant(0, "-", userNodes.get(myFirst)));
+                IntStream.range(0, ReplicationManager.getInstance().getUserNodes().size())
+                        .filter(i -> ReplicationManager.getInstance().getUserNodes().get(i).equals(myEndpoint))
+                        .forEach(i ->
+                                new UserNodeProposalMessage(
+                                        ReplicationManager.getInstance().getUsersMap().entrySet().stream()
+                                                .filter(e -> e.getKey().charAt(0) - 'a' == i)
+                                                .collect(ConcurrentHashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), ConcurrentHashMap::putAll)
+                                ).sendMessage(new Participant(0, "-", userNodes.get(i)))
+                        );
             }
             for (int i = 0; i < userNodes.size(); i++) {
                 if (userNodes.get(i) != null) ReplicationManager.getInstance().updateUserNode(userNodes.get(i), i);
