@@ -71,8 +71,10 @@ public abstract class Message implements Serializable {
             if (nodes.contains(myEndpoint)) { // if I am in the list, replace failed node with the node before
                 IntStream.range(0, nodes.size())
                         .forEach(i -> {
-                            if (nodes.get(i).equals(failedNode))
+                            if (nodes.get(i).equals(failedNode)){
+                                if (i == 0) nodes.set(i, nodes.get(nodes.lastIndexOf(failedNode) + 1));
                                 nodes.set(i, nodes.get(nodes.indexOf(failedNode) - 1));
+                            }
                         });
             } else { // If I am not in the last, I substitute the failed node
                 IntStream.range(0, nodes.size())
