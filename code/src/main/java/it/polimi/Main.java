@@ -13,6 +13,7 @@ import it.polimi.Message.RoomNodes.GetMyRoomsMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Message.UserNodes.JoinMessage;
 import it.polimi.States.RoomStateManager;
+import it.polimi.Storage.NodeHistoryManager;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
 
@@ -24,12 +25,16 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 public class Main {
     private static ServerSocket serverSocket;
     private static Thread listeningThread;
     public static String endpoint;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -94,6 +99,9 @@ public class Main {
         // Register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(LastWill::execute));
 
+        scheduler.scheduleAtFixedRate(Main::startup, 0, 30, TimeUnit.SECONDS);
+        new Thread(NodeHistoryManager:: resolveUserNodesPartition).start();
+        new Thread(NodeHistoryManager:: resolveRoomNodesPartition).start();
         readLine();
     }
 
@@ -199,10 +207,13 @@ public class Main {
                 );
 
         // Help the nodes that are currently responsible for the most data
-        new HelpMessage(true, false)
-                .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseRoomNodeToHelp()));
-        new HelpMessage(false, true)
-                .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseUserNodeToHelp()));
+        if(!ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint)
+                && !ReplicationManager.getInstance().getUserNodes().contains(myEndpoint)) {
+            new HelpMessage(true, false)
+                    .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseRoomNodeToHelp()));
+            new HelpMessage(false, true)
+                    .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseUserNodeToHelp()));
+        }
     }
 
     private static void sendBackups() {
