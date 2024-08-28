@@ -35,9 +35,6 @@ public class GetUserAddressMessage extends Message implements Serializable {
 
     @Override
     public void handleException(Participant participant) {
-        substituteFailedUserNode(
-                ReplicationManager.getInstance().getUserNodes()
-                        .get(participant.name().charAt(0) - 'a')
-        );
+        substituteFailedUserNode(participant.ipAddress());
     }
 }

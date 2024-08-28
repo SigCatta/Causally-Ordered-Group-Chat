@@ -33,6 +33,7 @@ public abstract class Message implements Serializable {
             out.writeObject(this);
             out.flush();
         } catch (Exception e) {
+
             System.out.println(participant.ipAddress());
             e.printStackTrace();
             handleException(participant);

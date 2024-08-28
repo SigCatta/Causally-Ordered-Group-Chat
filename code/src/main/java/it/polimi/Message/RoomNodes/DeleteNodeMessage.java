@@ -22,10 +22,7 @@ public class DeleteNodeMessage extends Message implements Serializable {
 
     @Override
     public void handleException(Participant participant) {
-        substituteFailedRoomNode(
-                ReplicationManager.getInstance().getRoomNodes()
-                        .get(participant.name().charAt(0) - 'a')
-        );
+        substituteFailedRoomNode(participant.ipAddress());
     }
 
     public String getRoomName() {

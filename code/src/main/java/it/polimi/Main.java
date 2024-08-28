@@ -167,6 +167,13 @@ public class Main {
         RoomStateManager state = RoomStateManager.getInstance();
         String myEndpoint = state.getIp() + ':' + state.getPort();
 
+        if (!ReplicationManager.getInstance().getRoomNodes().contains(null) || !ReplicationManager.getInstance().getUserNodes().contains(null)){
+            endpoint = ReplicationManager.getInstance().getRoomNodes().stream()
+                    .distinct()
+                    .filter( e -> !e.equals(myEndpoint))
+                    .findFirst().orElse(null);
+        }
+
         new RingDataRequestMessage(myEndpoint)
                 .sendMessage(new Participant(0, "-", endpoint));
 
