@@ -24,7 +24,7 @@ public class GetListRoomNodesMessage extends Message implements Serializable {
         // if I'm the leader in the other partitions I will respond unless I'm trying to solve the partition too
         if (NodeHistoryManager.getInstance().getS_room().tryAcquire()) {
             if (ReplicationManager.getInstance().getRoomNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
-                if (!NodeHistoryManager.getInstance().getSolvingPartition()) {
+                if (!NodeHistoryManager.getInstance().getSolvingPartitionRoom()) {
                     SendListRoomNodesMessage message = new SendListRoomNodesMessage(ReplicationManager.getInstance().getRoomNodes());
                     message.sendMessage(new Participant(0, "-", sender));
                 }
