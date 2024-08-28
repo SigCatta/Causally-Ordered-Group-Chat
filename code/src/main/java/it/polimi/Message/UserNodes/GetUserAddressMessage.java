@@ -11,15 +11,13 @@ public class GetUserAddressMessage extends Message implements Serializable {
     private final Participant participant;
     private final String endpoint;
     private final String roomName;
-    private final boolean creatingRoom;
     private final Message message;
 
-    public GetUserAddressMessage(Participant participant, String endpoint, String roomName, boolean creatingRoom, Message message) {
+    public GetUserAddressMessage(Participant participant, String endpoint, String roomName, Message message) {
         super("request of address");
         this.participant = participant;
         this.endpoint = endpoint;
         this.roomName = roomName;
-        this.creatingRoom = creatingRoom;
         this.message = message;
     }
 
@@ -28,7 +26,7 @@ public class GetUserAddressMessage extends Message implements Serializable {
         String address = ReplicationManager.getInstance().getIpAddress(participant.name());
         if (address != null)
             if (!address.isEmpty()) {
-                new UserAddressResponseMessage(new Participant(participant.index(), participant.name(), address), roomName, creatingRoom, message)
+                new UserAddressResponseMessage(new Participant(participant.index(), participant.name(), address), roomName, message)
                         .sendMessage(new Participant(0, "-", endpoint));
             }
     }

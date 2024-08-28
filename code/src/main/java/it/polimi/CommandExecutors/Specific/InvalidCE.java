@@ -38,7 +38,7 @@ public class InvalidCE implements CommandExecutor {
                             if (!p.ipAddress().equals("null")) {
                                 chatMessage.sendMessage(p);
                             } else {
-                                new GetUserAddressMessage(p, myEndpoint, RoomStateManager.getInstance().getRoomName(), false, chatMessage)
+                                new GetUserAddressMessage(p, myEndpoint, RoomStateManager.getInstance().getRoomName(), chatMessage)
                                         .sendMessage(new Participant(0, "-", ReplicationManager.getInstance()
                                                 .getRoomNodes().get(p.name().charAt(0) - 'a'))
                                         );

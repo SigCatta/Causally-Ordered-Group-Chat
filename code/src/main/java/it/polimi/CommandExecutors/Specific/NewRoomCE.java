@@ -2,6 +2,7 @@ package it.polimi.CommandExecutors.Specific;
 
 import it.polimi.CommandExecutors.CommandExecutor;
 import it.polimi.Entities.Participant;
+import it.polimi.Message.Chat.NewRoomMessage;
 import it.polimi.Message.RoomNodes.NewRoomNodeMessage;
 import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.States.HomeState;
@@ -48,9 +49,10 @@ public class NewRoomCE implements CommandExecutor {
             StableStorage.getInstance().initNewRoom(roomName, participants);
 
             // Ask for the ip of each user
+            NewRoomMessage message = new NewRoomMessage(roomName, participants);
             participants.stream()
                     .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
-                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, true, null)
+                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, message)
                             .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
                     );
         }

@@ -277,7 +277,7 @@ public class Main {
                     String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
                     ss.getParticipants(room).stream()
                             .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
-                            .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, false, message)
+                            .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, message)
                                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
                             );
                 });

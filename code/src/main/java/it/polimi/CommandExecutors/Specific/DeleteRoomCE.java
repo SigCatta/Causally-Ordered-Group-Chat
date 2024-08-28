@@ -33,7 +33,7 @@ public class DeleteRoomCE implements CommandExecutor {
             String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
             participants.stream()
                     .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
-                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, false, message)
+                    .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, message)
                             .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
                     );
             storage.delete(roomName);

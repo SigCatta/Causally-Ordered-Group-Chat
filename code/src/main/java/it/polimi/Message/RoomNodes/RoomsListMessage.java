@@ -44,7 +44,7 @@ public class RoomsListMessage extends Message implements Serializable {
                 StableStorage.getInstance().getParticipants(room)
                         .forEach(p -> {
                             if (p.ipAddress().equals("null")) {
-                                new GetUserAddressMessage(p, myEndpoint, room, false, message)
+                                new GetUserAddressMessage(p, myEndpoint, room, message)
                                         .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')));
                             } else message.sendMessage(p);
                         });

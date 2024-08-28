@@ -87,7 +87,7 @@ public class InRoomState implements RoomState {
                     (message.getRoomName(), RoomStateManager.getInstance().getUsername(), storage.getCurrentVectorClock(message.getRoomName()), chatmessages);
             Participant p = storage.getParticipant(message.getRoomName(), message.getSender());
             String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
-            new GetUserAddressMessage(p, myEndpoint, message.getRoomName(), false, replyMessage)
+            new GetUserAddressMessage(p, myEndpoint, message.getRoomName(),  replyMessage)
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')));
         }
     }

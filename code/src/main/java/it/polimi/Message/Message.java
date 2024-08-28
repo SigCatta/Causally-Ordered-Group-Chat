@@ -45,6 +45,7 @@ public abstract class Message implements Serializable {
 
 
     protected void substituteFailedUserNode(String failedNode) {
+        System.out.println("sostituisco user " + failedNode);
         List<String> nodes = ReplicationManager.getInstance().getUserNodes();
         substituteNode(failedNode, nodes);
 
@@ -52,6 +53,7 @@ public abstract class Message implements Serializable {
     }
 
     protected void substituteFailedRoomNode(String failedNode) {
+        System.out.println("sostituisco room" + failedNode);
         List<String> nodes = ReplicationManager.getInstance().getRoomNodes();
         substituteNode(failedNode, nodes);
 
