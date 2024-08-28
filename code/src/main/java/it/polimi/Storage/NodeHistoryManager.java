@@ -25,7 +25,7 @@ public class NodeHistoryManager {
     private NodeHistoryManager() {
         this.roomNodes = new HashSet<>();
         this.userNodes = new HashSet<>();
-        this.instance = new NodeHistoryManager();
+        instance = new NodeHistoryManager();
     }
 
     public static NodeHistoryManager getInstance() {
@@ -45,13 +45,8 @@ public class NodeHistoryManager {
         this.roomNodes.addAll(roomNodes);
     }
 
-
     public void addRoomNode(String node) {
         roomNodes.add(node);
-    }
-
-    public void removeRoomNode(String node) {
-        roomNodes.remove(node);
     }
 
     public Semaphore getS_room() {
@@ -79,10 +74,6 @@ public class NodeHistoryManager {
         userNodes.add(node);
     }
 
-    public void removeUserNode(String node) {
-        userNodes.remove(node);
-    }
-
     public Semaphore getS_user() {
         return s_user;
     }
@@ -93,7 +84,7 @@ public class NodeHistoryManager {
 
     public void resolveUserNodesPartition() {
         // checking if I am the leader to solve the partition
-        if (ReplicationManager.getInstance().getUserNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
+        if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
             solvingPartitionUser = true;
             userNodes.stream().filter(node -> !ReplicationManager.getInstance().getUserNodes().contains(node))
                     .forEach(node -> new GetListUserNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
@@ -103,7 +94,7 @@ public class NodeHistoryManager {
 
     public void resolveRoomNodesPartition() {
         // checking if I am the leader to solve the partition
-        if (ReplicationManager.getInstance().getRoomNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
+        if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
             solvingPartitionRoom = true;
             roomNodes.stream().filter(node -> !ReplicationManager.getInstance().getRoomNodes().contains(node))
                     .forEach(node -> new GetListRoomNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
@@ -111,16 +102,16 @@ public class NodeHistoryManager {
         }
     }
 
-    public void newUserList(List<String> newNodes) throws InterruptedException {
-        if (ReplicationManager.getInstance().getUserNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
+    public void newUserList(List<String> newNodes) {
+        if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(null, newNodes));
             solvingPartitionUser = false;
             s_user.release();
         }
     }
 
-    public void newRoomList(List<String> newNodes) throws InterruptedException {
-        if (ReplicationManager.getInstance().getRoomNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())){
+    public void newRoomList(List<String> newNodes) {
+        if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())){
             RingUpdateMessage.broadcast(new RingUpdateMessage(newNodes,null));
             solvingPartitionRoom = false;
             s_room.release();

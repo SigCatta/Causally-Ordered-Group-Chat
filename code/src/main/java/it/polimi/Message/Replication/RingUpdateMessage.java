@@ -43,6 +43,7 @@ public class RingUpdateMessage extends Message implements Serializable {
                         );
             }
             for (int i = 0; i < roomNodes.size(); i++) {
+                NodeHistoryManager.getInstance().addRoomNode(roomNodes.get(i));
                 if (roomNodes.get(i) != null) ReplicationManager.getInstance().updateRoomNode(roomNodes.get(i), i);
             }
         }
@@ -60,6 +61,7 @@ public class RingUpdateMessage extends Message implements Serializable {
                         );
             }
             for (int i = 0; i < userNodes.size(); i++) {
+                NodeHistoryManager.getInstance().addUserNode(userNodes.get(i));
                 if (userNodes.get(i) != null) ReplicationManager.getInstance().updateUserNode(userNodes.get(i), i);
             }
         }
