@@ -75,12 +75,16 @@ public abstract class Message implements Serializable {
                 IntStream.range(0, nodes.size())
                         .forEach(i -> {
                             if (nodes.get(i).equals(failedNode)){
+                                if (nodes.stream().distinct().count() == 1) return;
                                 if (i == 0) {
-                                    if (nodes.stream().distinct().count() == 1) return;
                                     nodes.set(i, nodes.get(nodes.lastIndexOf(failedNode) + 1));
                                     return;
                                 }
-                                nodes.set(i, nodes.get(nodes.indexOf(failedNode) - 1));
+                                try{
+                                    nodes.set(i, nodes.get(nodes.indexOf(failedNode) - 1));
+                                } catch (IndexOutOfBoundsException e){
+                                    nodes.set(i, nodes.get(nodes.lastIndexOf(failedNode) + 1));
+                                }
                             }
                         });
             } else { // If I am not in the last, I substitute the failed node
