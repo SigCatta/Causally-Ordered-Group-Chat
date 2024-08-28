@@ -99,6 +99,7 @@ public class Main {
         // Register shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(LastWill::execute));
 
+        NodeHistoryManager.getInstance();
         scheduler.scheduleAtFixedRate(Main::startup, 0, 30, TimeUnit.SECONDS);
         new Thread(NodeHistoryManager:: resolveUserNodesPartition).start();
         new Thread(NodeHistoryManager:: resolveRoomNodesPartition).start();
