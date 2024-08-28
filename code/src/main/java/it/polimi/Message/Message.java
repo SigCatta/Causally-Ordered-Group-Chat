@@ -8,6 +8,7 @@ import it.polimi.Storage.ReplicationManager;
 
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -33,14 +34,16 @@ public abstract class Message implements Serializable {
             out.writeObject(this);
             out.flush();
         } catch (Exception e) {
-
             System.out.println(participant.ipAddress());
-            e.printStackTrace();
             handleException(participant);
+            if (e instanceof ConnectException) return;
+            e.printStackTrace();
         }
     }
 
     public void handleException(Participant participant) {
+        substituteFailedUserNode(participant.ipAddress());
+        substituteFailedRoomNode(participant.ipAddress());
     }
 
 
