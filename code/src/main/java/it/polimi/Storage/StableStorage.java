@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class StableStorage {
     private final StorageWriter sw;
     private final StorageReader sr;
-
+    
     private static StableStorage instance = null;
     private final Semaphore sem = new Semaphore(1);
 
@@ -91,10 +91,10 @@ public class StableStorage {
 
     // Updates a participant's ip address
     public void updateParticipantIp(String roomId, Participant participant) {
-        waitForAccess();
         StringBuilder sb = new StringBuilder();
 
         // update the participant's ip address, while leaving the other ones untouched
+        waitForAccess();
         sr.getParticipants(roomId)
                 .forEach(p -> {
                     if (p.index() == participant.index()) {
@@ -169,8 +169,10 @@ public class StableStorage {
 
     // Stores an unsent message to stable storage
     public void storeUnsentMessage(String roomId, Message message) {
+        waitForAccess();
         sw.append(Paths.get(roomId, "unsent_msg.txt"), message.text() + '\n');
         sw.append(Paths.get(roomId, "unsent_vc.txt"), message.vectorClock().toString() + '\n');
+        sem.release();
     }
 
     // Returns a list of all unsent messages
@@ -186,7 +188,6 @@ public class StableStorage {
 
     // Deliver all deliverable delayed messages
     public void deliverDelayedMessages(String roomId) {
-        waitForAccess();
         List<Message> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
         List<Message> chat = new ArrayList<>(sr.getMessages(roomId));
         VectorClock vc = getCurrentVectorClock(roomId);
@@ -217,7 +218,6 @@ public class StableStorage {
                         .map(Message::text)
                         .toList() // List<String>
         ));
-        sem.release();
     }
 
     // Returns all messages that could be delivered after a given message ~ may contain messages already delivered!!

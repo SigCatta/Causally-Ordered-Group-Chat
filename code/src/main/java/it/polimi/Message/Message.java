@@ -8,7 +8,6 @@ import it.polimi.Storage.ReplicationManager;
 
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
