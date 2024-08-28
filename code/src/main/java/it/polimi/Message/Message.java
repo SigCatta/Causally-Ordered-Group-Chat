@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -36,7 +37,7 @@ public abstract class Message implements Serializable {
         } catch (Exception e) {
             System.out.println(participant.ipAddress());
             handleException(participant);
-            if (e instanceof ConnectException) return;
+            if (e instanceof SocketException) return;
             e.printStackTrace();
         }
     }
@@ -74,7 +75,11 @@ public abstract class Message implements Serializable {
                 IntStream.range(0, nodes.size())
                         .forEach(i -> {
                             if (nodes.get(i).equals(failedNode)){
-                                if (i == 0) nodes.set(i, nodes.get(nodes.lastIndexOf(failedNode) + 1));
+                                if (i == 0) {
+                                    if (nodes.stream().distinct().count() == 1) return;
+                                    nodes.set(i, nodes.get(nodes.lastIndexOf(failedNode) + 1));
+                                    return;
+                                }
                                 nodes.set(i, nodes.get(nodes.indexOf(failedNode) - 1));
                             }
                         });
