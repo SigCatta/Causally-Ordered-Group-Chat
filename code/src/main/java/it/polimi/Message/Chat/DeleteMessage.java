@@ -1,5 +1,6 @@
 package it.polimi.Message.Chat;
 
+import it.polimi.Entities.Participant;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 
@@ -19,6 +20,10 @@ public class DeleteMessage extends Message implements Serializable {
     @Override
     public void process(RoomState state) {
         state.handle(this);
+    }
+
+    @Override
+    public void handleException(Participant participant){
     }
 
 }

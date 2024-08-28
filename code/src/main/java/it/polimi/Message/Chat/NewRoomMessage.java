@@ -26,4 +26,9 @@ public class NewRoomMessage extends Message implements Serializable {
     public void process(RoomState state) {
         state.handle(this);
     }
+
+    @Override
+    public void handleException(Participant participant){
+    }
+
 }

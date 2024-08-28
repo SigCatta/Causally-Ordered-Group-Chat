@@ -1,5 +1,6 @@
 package it.polimi.Message.Chat;
 
+import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
@@ -42,5 +43,9 @@ public class UpdateChatReplyMessage extends Message implements Serializable {
     public void process(RoomState state) {
         chatmessages.forEach(message -> StableStorage.getInstance().delayMessage(roomName,message));
         StableStorage.getInstance().deliverDelayedMessages(roomName);
+    }
+
+    @Override
+    public void handleException(Participant participant){
     }
 }
