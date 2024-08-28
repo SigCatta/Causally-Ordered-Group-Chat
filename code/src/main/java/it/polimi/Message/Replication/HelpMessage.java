@@ -60,7 +60,8 @@ public class HelpMessage extends Message implements Serializable {
 
                 // tell other ring nodes about the change
                 List<String> newRoomNodes = ReplicationManager.getInstance().getRoomNodes();
-                for (int i = roomNodes.indexOf(myEntry); i < roomNodes.indexOf(myEntry) + count / 2; i++) {
+                long limit = roomNodes.indexOf(myEntry) + count / 2;
+                for (int i = roomNodes.indexOf(myEntry); i < limit; i++) {
                     newRoomNodes.set(i, ip + ':' + port);
                 }
                 RingUpdateMessage.broadcast(new RingUpdateMessage(newRoomNodes, null));
@@ -102,7 +103,8 @@ public class HelpMessage extends Message implements Serializable {
 
                 // tell other ring nodes about the change
                 List<String> newUserNodes = ReplicationManager.getInstance().getUserNodes();
-                for (int i = userNodes.indexOf(myEntry); i < userNodes.indexOf(myEntry) + count / 2; i++) {
+                long limit = userNodes.indexOf(myEntry) + count / 2;
+                for (int i = userNodes.indexOf(myEntry); i < limit; i++) {
                     newUserNodes.set(i, ip + ':' + port);
                 }
                 RingUpdateMessage.broadcast(new RingUpdateMessage(null, newUserNodes));
