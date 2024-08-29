@@ -264,7 +264,6 @@ public class Main {
     }
 
     private static void update_chats() {
-        System.out.println("updating chats");
         StableStorage ss = StableStorage.getInstance();
         ss.getRoomNames()
                 .forEach(room -> {

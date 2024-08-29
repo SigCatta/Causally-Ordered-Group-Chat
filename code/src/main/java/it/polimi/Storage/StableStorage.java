@@ -119,11 +119,7 @@ public class StableStorage {
         VectorClock currentVC = getCurrentVectorClock(roomId);
         VectorClock newVC = message.vectorClock();
 
-        if (sr.getMessages(roomId).stream().noneMatch(m -> m.sameMessage(m, message))) {
-            sw.append(Paths.get(roomId, "vector_clocks.txt"), newVC.toString() + '\n');
-            sw.append(Paths.get(roomId, "messages.txt"), message.text() + '\n');
-            sw.overwrite(Paths.get(roomId, "last_vc.txt"), currentVC.merge(newVC).toString());
-        }
+        applyMessageDelivery(roomId, message, newVC, currentVC);
         sem.release();
     }
 
@@ -131,6 +127,7 @@ public class StableStorage {
     // messages are stored in order based on their vector clocks
     public void delayMessage(String roomId, Message message) {
         acquire();
+        System.out.println("Delaying message: " + message.text());
         List<Message> messages = sr.getDelayedMessages(roomId);
         StringBuilder vcSB = new StringBuilder();
         StringBuilder msgSB = new StringBuilder();
@@ -145,16 +142,18 @@ public class StableStorage {
             ok = true;
         }
 
-        for (Message msg : messages) {
-            // If the message is a duplicate, don't save it again
-            if (msg.vectorClock().toString().equals(newVC.toString())) return;
+        if (!ok){
+            for (Message msg : messages) {
+                // If the message is a duplicate, don't save it again
+                if (msg.vectorClock().toString().equals(newVC.toString())) return;
 
-            vcSB.append(msg.vectorClock()).append('\n');
-            msgSB.append(msg.text()).append('\n');
-            if (newVC.canBeDeliveredAfter(msg.vectorClock()) && !ok) {
-                vcSB.append(newVC).append('\n');
-                msgSB.append(newText).append('\n');
-                ok = true;
+                vcSB.append(msg.vectorClock()).append('\n');
+                msgSB.append(msg.text()).append('\n');
+                if (newVC.canBeDeliveredAfter(msg.vectorClock()) && !ok) {
+                    vcSB.append(newVC).append('\n');
+                    msgSB.append(newText).append('\n');
+                    ok = true;
+                }
             }
         }
         if (!ok) {
@@ -186,6 +185,7 @@ public class StableStorage {
 
     // Deliver all deliverable delayed messages
     public void deliverDelayedMessages(String roomId) {
+        acquire();
         List<Message> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
         List<Message> chat = new ArrayList<>(sr.getMessages(roomId));
         VectorClock vc = getCurrentVectorClock(roomId);
@@ -196,7 +196,9 @@ public class StableStorage {
             VectorClock newVC = msg.vectorClock();
             if (newVC.canBeDeliveredAfter(vc)) {
                 if (!chat.contains(msg)) {
-                    deliverMessage(roomId, msg);
+                    VectorClock currentVC = getCurrentVectorClock(roomId);
+
+                    applyMessageDelivery(roomId, msg, newVC, currentVC);
                 }
                 vc = newVC;
 
@@ -216,6 +218,15 @@ public class StableStorage {
                         .map(Message::text)
                         .toList() // List<String>
         ));
+        sem.release();
+    }
+
+    private void applyMessageDelivery(String roomId, Message msg, VectorClock newVC, VectorClock currentVC) {
+        if (sr.getMessages(roomId).stream().noneMatch(m -> m.sameMessage(m, msg))) {
+            sw.append(Paths.get(roomId, "vector_clocks.txt"), newVC.toString() + '\n');
+            sw.append(Paths.get(roomId, "messages.txt"), msg.text() + '\n');
+            sw.overwrite(Paths.get(roomId, "last_vc.txt"), currentVC.merge(newVC).toString());
+        }
     }
 
     // Returns all messages that could be delivered after a given message ~ may contain messages already delivered!!
