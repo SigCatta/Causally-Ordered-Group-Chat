@@ -49,6 +49,10 @@ class StorageReader {
                 .toList();
     }
 
+    public int getNumOfUsers(String roomId){
+        return catFile(Paths.get(PATH, roomId, "usernames.txt")).size();
+    }
+
     // Returns the list of participants for a given chat room
     public List<Participant> getParticipants(String roomId) {
         Iterator<String> usernames = catFile(Paths.get(PATH, roomId, "usernames.txt")).iterator();

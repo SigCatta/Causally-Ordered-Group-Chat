@@ -142,7 +142,7 @@ public class StableStorage {
             ok = true;
         }
 
-        if (!ok){
+        if (!ok) {
             for (Message msg : messages) {
                 // If the message is a duplicate, don't save it again
                 if (msg.vectorClock().toString().equals(newVC.toString())) {
@@ -303,7 +303,8 @@ public class StableStorage {
                 return p.index();
             }
         }
-        return -1;
+        sw.overwrite(Paths.get(roomName, "addresses.txt"), new StringBuilder().repeat("null\n", sr.getNumOfUsers(roomName)).toString());
+        return getIndex(roomName, username);
     }
 
     // Prints all messages in a chat room

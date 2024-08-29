@@ -34,7 +34,6 @@ public abstract class Message implements Serializable {
             out.writeObject(this);
             out.flush();
         } catch (Exception e) {
-            System.out.println(participant.ipAddress());
             handleException(participant);
             if (e instanceof SocketException) return;
             e.printStackTrace();
