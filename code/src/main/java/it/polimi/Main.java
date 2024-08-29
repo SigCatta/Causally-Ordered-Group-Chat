@@ -168,10 +168,16 @@ public class Main {
         String myEndpoint = state.getIp() + ':' + state.getPort();
 
         if (!ReplicationManager.getInstance().getRoomNodes().contains(null) || !ReplicationManager.getInstance().getUserNodes().contains(null)) {
-            endpoint = ReplicationManager.getInstance().getRoomNodes().stream()
+            endpoint = ReplicationManager.getInstance().getUserNodes().stream()
                     .distinct()
                     .filter(e -> !e.equals(myEndpoint))
                     .findFirst().orElse(null);
+
+            if (endpoint == null)
+                endpoint = ReplicationManager.getInstance().getUsersMap().values().stream()
+                        .distinct()
+                        .filter(e -> !e.equals(myEndpoint))
+                        .findFirst().orElse(null);
         }
 
         new RingDataRequestMessage(myEndpoint)

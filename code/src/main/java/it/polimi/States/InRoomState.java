@@ -2,6 +2,7 @@ package it.polimi.States;
 
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
+import it.polimi.Main;
 import it.polimi.Message.*;
 import it.polimi.Message.Chat.*;
 import it.polimi.Message.RoomNodes.DeleteNodeMessage;
@@ -44,6 +45,10 @@ public class InRoomState implements RoomState {
 
     @Override
     public void handle(ChatMessage message) {
+        if (!StableStorage.getInstance().doesRoomExist(message.getRoomName())) {
+            Main.startup();
+            return;
+        }
         StableStorage storage = StableStorage.getInstance();
         VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
         if (message.getMessage().vectorClock().canBeDeliveredAfter(vectorClock)) {
