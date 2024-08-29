@@ -17,9 +17,12 @@ public class SendListRoomNodesMessage extends Message implements Serializable {
     @Override
     public void process(RoomState state) {
         try{
+            System.out.println("send");
             if(NodeHistoryManager.getInstance().getS_room().tryAcquire()){
+                System.out.println("Received room nodes from leader");
                 NodeHistoryManager.getInstance().newRoomList(roomNodes);
             }
+            System.out.println("out");
         }catch(Exception e){
 
         }

@@ -16,8 +16,8 @@ public class NodeHistoryManager {
     private static Set<String> userNodes;
     private static NodeHistoryManager instance;
 
-    private static Boolean solvingPartitionUser;
-    private static Boolean solvingPartitionRoom;
+    private static Boolean solvingPartitionUser = false;
+    private static Boolean solvingPartitionRoom = false;
 
     private final Semaphore s_user = new Semaphore(1);
     private final Semaphore s_room = new Semaphore(1);
@@ -93,6 +93,13 @@ public class NodeHistoryManager {
                         .forEach(node -> new GetListUserNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
                                 .sendMessage(new Participant(0, "-", node)));
                 System.out.println(ReplicationManager.getInstance().getUserNodes());
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                solvingPartitionUser = false;
             }
         }
     }
@@ -109,6 +116,13 @@ public class NodeHistoryManager {
                         .forEach(node -> new GetListRoomNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
                                 .sendMessage(new Participant(0, "-", node)));
                 System.out.println(ReplicationManager.getInstance().getRoomNodes());
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                solvingPartitionRoom = false;
             }
         }
     }
@@ -122,6 +136,7 @@ public class NodeHistoryManager {
     }
 
     public void newUserList(List<String> newNodes) {
+        System.out.println("newUserList");
         if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(null, newNodes));
             solvingPartitionUser = false;
@@ -130,6 +145,7 @@ public class NodeHistoryManager {
     }
 
     public void newRoomList(List<String> newNodes) {
+        System.out.println("newRoomList");
         if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(newNodes, null));
             solvingPartitionRoom = false;
