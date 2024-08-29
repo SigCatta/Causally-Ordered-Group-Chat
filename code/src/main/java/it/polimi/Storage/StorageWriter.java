@@ -14,11 +14,9 @@ import java.util.stream.Stream;
 
 class StorageWriter {
     private final Path PATH = Paths.get(System.getProperty("user.home"), "chat_ss", RoomStateManager.getInstance().getUsername());
-    private final Semaphore sem = new Semaphore(1);
 
     // Appends a String to a file
     public void append(Path relative, String string) {
-        waitForAccess();
         Path location = sanitizePath(relative);
         if (Files.exists(location)) {
             try (FileWriter writer = new FileWriter(location.toString(), true)) {
@@ -27,12 +25,10 @@ class StorageWriter {
                 e.printStackTrace();
             }
         }
-        sem.release();
     }
 
     // Overwrites a file, effectively deleting all contents
     public void overwrite(Path relative, String string) {
-        waitForAccess();
         Path location = sanitizePath(relative);
         if (Files.exists(location)) {
             try (FileWriter writer = new FileWriter(location.toString())) {
@@ -41,7 +37,6 @@ class StorageWriter {
                 e.printStackTrace();
             }
         }
-        sem.release();
     }
 
     // Creates a file at a give position
@@ -130,13 +125,5 @@ class StorageWriter {
 
     public Path getPATH() {
         return PATH;
-    }
-
-    private void waitForAccess() {
-        try {
-            sem.acquire();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

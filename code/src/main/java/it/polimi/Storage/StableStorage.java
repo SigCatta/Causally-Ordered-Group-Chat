@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 public class StableStorage {
     private final StorageWriter sw;
     private final StorageReader sr;
-    
-    private static StableStorage instance = null;
+
     private final Semaphore sem = new Semaphore(1);
+    private static StableStorage instance = null;
 
     private StableStorage() {
         this.sw = new StorageWriter();
@@ -91,10 +91,10 @@ public class StableStorage {
 
     // Updates a participant's ip address
     public void updateParticipantIp(String roomId, Participant participant) {
+        acquire();
         StringBuilder sb = new StringBuilder();
 
         // update the participant's ip address, while leaving the other ones untouched
-        waitForAccess();
         sr.getParticipants(roomId)
                 .forEach(p -> {
                     if (p.index() == participant.index()) {
@@ -115,7 +115,7 @@ public class StableStorage {
 
     // DELIVERED - Saves a message to stable storage, along with the vector clock
     public void deliverMessage(String roomId, Message message) {
-        waitForAccess();
+        acquire();
         VectorClock currentVC = getCurrentVectorClock(roomId);
         VectorClock newVC = message.vectorClock();
 
@@ -130,7 +130,7 @@ public class StableStorage {
     // DELAYED - saves a message to stable storage, along with the vector clock
     // messages are stored in order based on their vector clocks
     public void delayMessage(String roomId, Message message) {
-        waitForAccess();
+        acquire();
         List<Message> messages = sr.getDelayedMessages(roomId);
         StringBuilder vcSB = new StringBuilder();
         StringBuilder msgSB = new StringBuilder();
@@ -169,10 +169,8 @@ public class StableStorage {
 
     // Stores an unsent message to stable storage
     public void storeUnsentMessage(String roomId, Message message) {
-        waitForAccess();
         sw.append(Paths.get(roomId, "unsent_msg.txt"), message.text() + '\n');
         sw.append(Paths.get(roomId, "unsent_vc.txt"), message.vectorClock().toString() + '\n');
-        sem.release();
     }
 
     // Returns a list of all unsent messages
@@ -320,7 +318,7 @@ public class StableStorage {
         }
     }
 
-    private void waitForAccess() {
+    private void acquire() {
         try {
             sem.acquire();
         } catch (InterruptedException e) {

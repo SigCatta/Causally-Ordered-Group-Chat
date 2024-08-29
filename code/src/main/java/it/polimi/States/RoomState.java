@@ -13,7 +13,6 @@ public interface RoomState{
     void handle(NewRoomMessage message);
     void handle(DeleteMessage message);
     void handle(ChatMessage message);
-    void handle(UpdateChatRequestMessage message);
     void handle(NewRoomNodeMessage message);
     void handle(DeleteNodeMessage message);
 }

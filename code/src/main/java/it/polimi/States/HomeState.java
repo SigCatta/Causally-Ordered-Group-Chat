@@ -53,30 +53,6 @@ public class HomeState implements RoomState{
         storage.deliverDelayedMessages(message.getRoomName());
     }
 
-    @Override
-    public void handle(UpdateChatRequestMessage message) {
-        StableStorage storage = StableStorage.getInstance();
-        if(storage.getRoomNames().contains(message.getRoomName())){
-            // getting unsent messages from the user just connected
-            for (it.polimi.Entities.Message msg : message.getUnsentMessages()) {
-                VectorClock vectorClock = storage.getCurrentVectorClock(message.getRoomName());
-                if (msg.vectorClock().canBeDeliveredAfter(vectorClock)) {
-                    storage.deliverMessage(message.getRoomName(), msg);
-                } else {
-                    storage.delayMessage(message.getRoomName(), msg);
-                }
-            }
-            storage.deliverDelayedMessages(message.getRoomName());
-            // sending its vector clock and the chat messages
-            List<it.polimi.Entities.Message> chatmessages = storage.getChatMessages(message.getRoomName());
-            UpdateChatReplyMessage replyMessage = new UpdateChatReplyMessage
-                    (message.getRoomName(), RoomStateManager.getInstance().getUsername(), storage.getCurrentVectorClock(message.getRoomName()), chatmessages);
-            Participant p = storage.getParticipant(message.getRoomName(), message.getSender());
-            String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
-            new GetUserAddressMessage(p, myEndpoint, message.getRoomName(), replyMessage)
-                    .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')));
-        }
-    }
 
     @Override
     public void handle(NewRoomNodeMessage message){

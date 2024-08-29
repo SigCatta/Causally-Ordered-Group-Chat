@@ -35,8 +35,7 @@ public class RoomsListMessage extends Message implements Serializable {
 
                 UpdateChatRequestMessage message = new UpdateChatRequestMessage(
                         room,
-                        RoomStateManager.getInstance().getUsername(),
-                        StableStorage.getInstance().getCurrentVectorClock(room),
+                        RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort(),
                         StableStorage.getInstance().getUnsentMessages(room)
                 );
 

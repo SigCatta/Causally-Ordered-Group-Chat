@@ -100,9 +100,9 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(LastWill::execute));
 
         NodeHistoryManager.getInstance();
-        scheduler.scheduleAtFixedRate(Main::startup, 0, 30, TimeUnit.SECONDS);
-        new Thread(NodeHistoryManager:: resolveUserNodesPartition).start();
-        new Thread(NodeHistoryManager:: resolveRoomNodesPartition).start();
+        scheduler.scheduleAtFixedRate(Main::startup, 10, 30, TimeUnit.SECONDS);
+        new Thread(NodeHistoryManager::resolveUserNodesPartition).start();
+        new Thread(NodeHistoryManager::resolveRoomNodesPartition).start();
         readLine();
     }
 
@@ -167,10 +167,10 @@ public class Main {
         RoomStateManager state = RoomStateManager.getInstance();
         String myEndpoint = state.getIp() + ':' + state.getPort();
 
-        if (!ReplicationManager.getInstance().getRoomNodes().contains(null) || !ReplicationManager.getInstance().getUserNodes().contains(null)){
+        if (!ReplicationManager.getInstance().getRoomNodes().contains(null) || !ReplicationManager.getInstance().getUserNodes().contains(null)) {
             endpoint = ReplicationManager.getInstance().getRoomNodes().stream()
                     .distinct()
-                    .filter( e -> !e.equals(myEndpoint))
+                    .filter(e -> !e.equals(myEndpoint))
                     .findFirst().orElse(null);
         }
 
@@ -215,7 +215,7 @@ public class Main {
                 );
 
         // Help the nodes that are currently responsible for the most data
-        if(!ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint)
+        if (!ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint)
                 && !ReplicationManager.getInstance().getUserNodes().contains(myEndpoint)) {
             new HelpMessage(true, false)
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseRoomNodeToHelp()));
@@ -264,13 +264,13 @@ public class Main {
     }
 
     private static void update_chats() {
+        System.out.println("updating chats");
         StableStorage ss = StableStorage.getInstance();
         ss.getRoomNames()
                 .forEach(room -> {
                     UpdateChatRequestMessage message = new UpdateChatRequestMessage(
                             room,
-                            RoomStateManager.getInstance().getUsername(), // my username
-                            ss.getCurrentVectorClock(room), // my current vector clock
+                            RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort(), // my username
                             ss.getUnsentMessages(room) // all unsent messages
                     );
 
