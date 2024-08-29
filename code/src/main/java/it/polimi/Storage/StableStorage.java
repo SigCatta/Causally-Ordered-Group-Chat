@@ -145,7 +145,10 @@ public class StableStorage {
         if (!ok){
             for (Message msg : messages) {
                 // If the message is a duplicate, don't save it again
-                if (msg.vectorClock().toString().equals(newVC.toString())) return;
+                if (msg.vectorClock().toString().equals(newVC.toString())) {
+                    sem.release();
+                    return;
+                }
 
                 vcSB.append(msg.vectorClock()).append('\n');
                 msgSB.append(msg.text()).append('\n');
