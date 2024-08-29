@@ -91,7 +91,6 @@ public class StableStorage {
 
     // Updates a participant's ip address
     public void updateParticipantIp(String roomId, Participant participant) {
-        acquire();
         StringBuilder sb = new StringBuilder();
 
         // update the participant's ip address, while leaving the other ones untouched
@@ -105,7 +104,6 @@ public class StableStorage {
                 });
 
         sw.overwrite(Paths.get(roomId, "addresses.txt"), sb.toString());
-        sem.release();
     }
 
     // Returns the current vector clock
@@ -115,19 +113,21 @@ public class StableStorage {
 
     // DELIVERED - Saves a message to stable storage, along with the vector clock
     public void deliverMessage(String roomId, Message message) {
-        acquire();
         VectorClock currentVC = getCurrentVectorClock(roomId);
         VectorClock newVC = message.vectorClock();
 
         applyMessageDelivery(roomId, message, newVC, currentVC);
-        sem.release();
     }
 
     // DELAYED - saves a message to stable storage, along with the vector clock
     // messages are stored in order based on their vector clocks
     public void delayMessage(String roomId, Message message) {
-        acquire();
-        System.out.println("Delaying message: " + message.text());
+        try {
+            sem.acquire();
+        } catch (InterruptedException e) {
+            sem.release();
+            throw new RuntimeException(e);
+        }
         List<Message> messages = sr.getDelayedMessages(roomId);
         StringBuilder vcSB = new StringBuilder();
         StringBuilder msgSB = new StringBuilder();
@@ -188,7 +188,6 @@ public class StableStorage {
 
     // Deliver all deliverable delayed messages
     public void deliverDelayedMessages(String roomId) {
-        acquire();
         List<Message> messages = new ArrayList<>(sr.getDelayedMessages(roomId));
         List<Message> chat = new ArrayList<>(sr.getMessages(roomId));
         VectorClock vc = getCurrentVectorClock(roomId);
@@ -221,15 +220,25 @@ public class StableStorage {
                         .map(Message::text)
                         .toList() // List<String>
         ));
-        sem.release();
     }
 
     private void applyMessageDelivery(String roomId, Message msg, VectorClock newVC, VectorClock currentVC) {
+        try {
+            sem.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        List<VectorClock> vectorClocks = getChatMessages(roomId).stream().map(Message::vectorClock).toList();
+        if (vectorClocks.contains(newVC)) {
+            sem.release();
+            return;
+        }
         if (sr.getMessages(roomId).stream().noneMatch(m -> m.sameMessage(m, msg))) {
             sw.append(Paths.get(roomId, "vector_clocks.txt"), newVC.toString() + '\n');
             sw.append(Paths.get(roomId, "messages.txt"), msg.text() + '\n');
             sw.overwrite(Paths.get(roomId, "last_vc.txt"), currentVC.merge(newVC).toString());
         }
+        sem.release();
     }
 
     // Returns all messages that could be delivered after a given message ~ may contain messages already delivered!!
@@ -328,14 +337,6 @@ public class StableStorage {
         try {
             Files.deleteIfExists(getBackupPath());
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void acquire() {
-        try {
-            sem.acquire();
-        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }

@@ -1,6 +1,7 @@
 package it.polimi.Message.Chat;
 
 import it.polimi.Entities.Participant;
+import it.polimi.Entities.VectorClock;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.StableStorage;
@@ -25,11 +26,13 @@ public class UpdateChatReplyMessage extends Message implements Serializable {
 
     @Override
     public void process(RoomState state) {
-        chatMessages.stream()
-                .filter(message ->
-                        StableStorage.getInstance().getChatMessages(roomName).stream()
-                                .noneMatch(m -> m.vectorClock().equals(message.vectorClock())))
-                .forEach(message -> StableStorage.getInstance().delayMessage(roomName, message));
+        List<VectorClock> vectorClocks = StableStorage.getInstance().getChatMessages(roomName).stream().map(it.polimi.Entities.Message::vectorClock).toList();
+        for (it.polimi.Entities.Message message : chatMessages) {
+            if (!vectorClocks.contains(message.vectorClock())){
+                StableStorage.getInstance().delayMessage(roomName, message);
+            }
+        }
+
         StableStorage.getInstance().deliverDelayedMessages(roomName);
     }
 
