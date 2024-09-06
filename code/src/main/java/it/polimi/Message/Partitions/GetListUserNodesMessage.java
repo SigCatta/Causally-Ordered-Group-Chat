@@ -29,6 +29,7 @@ public class GetListUserNodesMessage extends Message implements Serializable {
                         .sendMessage(new Participant(0, "-", sender));
             }
         } else {
+            if (leader.equals(sender)) return; // this mean that there is no actual partition, I am just not part of the ring
             System.out.println("Redirecting request to leader");
             this.sendMessage(new Participant(0, "-", leader));
         }
