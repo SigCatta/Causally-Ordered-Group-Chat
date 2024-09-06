@@ -230,13 +230,12 @@ public class Main {
                 );
 
         // Help the nodes that are currently responsible for the most data
-        if (!ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint)
-                && !ReplicationManager.getInstance().getUserNodes().contains(myEndpoint)) {
+        if (!ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint))
             new HelpMessage(true, false)
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseRoomNodeToHelp()));
+        if (ReplicationManager.getInstance().getUserNodes().contains(myEndpoint))
             new HelpMessage(false, true)
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseUserNodeToHelp()));
-        }
     }
 
     private static void sleepForRand() {
