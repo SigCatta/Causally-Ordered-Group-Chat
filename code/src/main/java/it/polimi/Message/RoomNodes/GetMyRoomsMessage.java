@@ -25,11 +25,12 @@ public class GetMyRoomsMessage extends Message implements Serializable {
                 .getRoomsMap()
                 .entrySet().stream()
                 .filter(e -> e.getValue().contains(username)) // only include rooms where the user is present
+                .filter(e -> !ReplicationManager.getInstance().getDeletedRooms().contains(e.getKey())) // do not include deleted rooms
                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll); // create a new HashMap out of the results
 
-        if (!roomsFound.isEmpty()) {
+        if (!roomsFound.isEmpty())
             new RoomsListMessage(roomsFound).sendMessage(new Participant(0, "-", endpoint));
-        }
+
     }
 
     @Override
