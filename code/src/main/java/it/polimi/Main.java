@@ -233,7 +233,7 @@ public class Main {
         if (!ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint))
             new HelpMessage(true, false)
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseRoomNodeToHelp()));
-        if (ReplicationManager.getInstance().getUserNodes().contains(myEndpoint))
+        if (!ReplicationManager.getInstance().getUserNodes().contains(myEndpoint))
             new HelpMessage(false, true)
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseUserNodeToHelp()));
     }
