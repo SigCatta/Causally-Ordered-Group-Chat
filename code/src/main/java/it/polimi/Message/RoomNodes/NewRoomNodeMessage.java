@@ -32,5 +32,6 @@ public class NewRoomNodeMessage extends Message implements Serializable {
     @Override
     public void handleException(Participant participant) {
         substituteFailedRoomNode(participant.ipAddress());
+        ReplicationManager.getInstance().addRoom(roomName,participants);
     }
 }

@@ -30,6 +30,11 @@ public class DeleteRoomCE implements CommandExecutor {
 
             RoomStateManager.getInstance().setCurrentState(HomeState.getInstance());
 
+            // Delete the room to the map in case the responsible node cannot be reached ~ it will be added eventually when the node is reachable, or I become the responsible node
+            if(!RoomStateManager.getInstance().getConnected()){
+                ReplicationManager.getInstance().deleteRoom(roomName);
+            }
+
             String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
             participants.stream()
                     .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
