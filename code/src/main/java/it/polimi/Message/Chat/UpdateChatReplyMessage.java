@@ -26,6 +26,7 @@ public class UpdateChatReplyMessage extends Message implements Serializable {
 
     @Override
     public void process(RoomState state) {
+        if (!StableStorage.getInstance().doesRoomExist(roomName)) return;
         List<VectorClock> vectorClocks = StableStorage.getInstance().getChatMessages(roomName).stream().map(it.polimi.Entities.Message::vectorClock).toList();
         for (it.polimi.Entities.Message message : chatMessages) {
             if (!vectorClocks.contains(message.vectorClock())){
