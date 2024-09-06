@@ -27,7 +27,7 @@ public class HelpMessage extends Message implements Serializable {
 
     @Override
     public void process(RoomState state) {
-        String myEntry = RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort();
+        String myEntry = RoomStateManager.getInstance().getMyEndpoint();
 
         if (room) {
             // check how many letters I handle

@@ -23,14 +23,13 @@ public class SendListUserNodesMessage extends Message implements Serializable {
     @Override
     public void process(RoomState state) {
         try{
-            System.out.println("send");
             if(NodeHistoryManager.getInstance().getS_user().tryAcquire()){
-                System.out.println("Received user nodes from leader");
+                System.out.println("Received user nodes from leader, substituting...");
                 NodeHistoryManager.getInstance().newUserList(UserNodes);
             }
-            System.out.println("out");
+            System.out.println("done");
         }catch(Exception e){
-
+            e.printStackTrace();
         }
     }
 }

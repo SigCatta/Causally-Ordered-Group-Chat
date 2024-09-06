@@ -82,62 +82,56 @@ public class NodeHistoryManager {
     }
 
 
-    @SuppressWarnings("InfiniteLoopStatement")
     public static void resolveUserNodesPartition() {
+        RoomStateManager.getInstance().setConnected(true);
         // checking if I am the leader to solve the partition
-        while (true) {
-            sleepRandomTime();
-            if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
-                solvingPartitionUser = true;
-                userNodes.stream().filter(node -> !ReplicationManager.getInstance().getUserNodes().contains(node))
-                        .forEach(node -> new GetListUserNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
-                                .sendMessage(new Participant(0, "-", node)));
-                System.out.println(ReplicationManager.getInstance().getUserNodes());
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                solvingPartitionUser = false;
+        if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
+            System.out.println("Solving user partition...");
+            System.out.println(userNodes);
+            solvingPartitionUser = true;
+            userNodes.stream().filter(node -> !ReplicationManager.getInstance().getUserNodes().contains(node))
+                    .forEach(node -> {
+                        System.out.println("sending to node " + node);
+                        RoomStateManager.getInstance().setConnected(true);
+                        new GetListUserNodesMessage(RoomStateManager.getInstance().getMyEndpoint())
+                                .sendMessage(new Participant(0, "-", node));
+                    });
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
+            solvingPartitionUser = false;
         }
     }
 
 
-    @SuppressWarnings("InfiniteLoopStatement")
     public static void resolveRoomNodesPartition() {
+        RoomStateManager.getInstance().setConnected(true);
         // checking if I am the leader to solve the partition
-        while (true) {
-            sleepRandomTime();
-            if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
-                solvingPartitionRoom = true;
-                roomNodes.stream().filter(node -> !ReplicationManager.getInstance().getRoomNodes().contains(node))
-                        .forEach(node -> new GetListRoomNodesMessage(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())
-                                .sendMessage(new Participant(0, "-", node)));
-                System.out.println(ReplicationManager.getInstance().getRoomNodes());
-
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                solvingPartitionRoom = false;
+        if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
+            System.out.println("Solving room partition...");
+            System.out.println(roomNodes);
+            solvingPartitionRoom = true;
+            roomNodes.stream().filter(node -> !ReplicationManager.getInstance().getRoomNodes().contains(node))
+                    .forEach(node -> {
+                        System.out.println("sending to node " + node);
+                        RoomStateManager.getInstance().setConnected(true);
+                        new GetListRoomNodesMessage(RoomStateManager.getInstance().getMyEndpoint())
+                                .sendMessage(new Participant(0, "-", node));
+                    });
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        }
-    }
-
-    private static void sleepRandomTime() {
-        try {
-            Thread.sleep((long) (Math.random() * 100000 + 30000));
-        } catch (InterruptedException ignored) {
-
+            solvingPartitionRoom = false;
         }
     }
 
     public void newUserList(List<String> newNodes) {
         System.out.println("newUserList");
-        if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
+        if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(null, newNodes));
             solvingPartitionUser = false;
             s_user.release();
@@ -146,7 +140,7 @@ public class NodeHistoryManager {
 
     public void newRoomList(List<String> newNodes) {
         System.out.println("newRoomList");
-        if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
+        if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(newNodes, null));
             solvingPartitionRoom = false;
             s_room.release();

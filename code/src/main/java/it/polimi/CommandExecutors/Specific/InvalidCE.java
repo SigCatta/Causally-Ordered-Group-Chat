@@ -29,7 +29,7 @@ public class InvalidCE implements CommandExecutor {
             Message msgToSend = new Message(text, updated);
             ChatMessage chatMessage = new ChatMessage(msgToSend, RoomStateManager.getInstance().getUsername(), RoomStateManager.getInstance().getRoomName());
             storage.deliverMessage(RoomStateManager.getInstance().getRoomName(), msgToSend);
-            String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
+            String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
 
             if (RoomStateManager.getInstance().getConnected()) {
                 storage.getParticipants(RoomStateManager.getInstance().getRoomName()).stream()

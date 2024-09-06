@@ -35,11 +35,11 @@ public class RoomsListMessage extends Message implements Serializable {
 
                 UpdateChatRequestMessage message = new UpdateChatRequestMessage(
                         room,
-                        RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort(),
+                        RoomStateManager.getInstance().getMyEndpoint(),
                         StableStorage.getInstance().getUnsentMessages(room)
                 );
 
-                String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
+                String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
                 StableStorage.getInstance().getParticipants(room)
                         .forEach(p -> {
                             if (p.ipAddress().equals("null")) {

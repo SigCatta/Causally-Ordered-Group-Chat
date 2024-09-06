@@ -1,5 +1,7 @@
 package it.polimi.Message.Replication;
 
+import it.polimi.Entities.Participant;
+import it.polimi.LastWill;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.ReplicationManager;
@@ -16,6 +18,11 @@ public class UserNodeProposalMessage extends Message implements Serializable {
 
     @Override
     public void process(RoomState state) {
+        ReplicationManager.getInstance().getUsersMap().putAll(usersMap);
+    }
+
+    @Override
+    public void handleException(Participant participant){
         ReplicationManager.getInstance().getUsersMap().putAll(usersMap);
     }
 }

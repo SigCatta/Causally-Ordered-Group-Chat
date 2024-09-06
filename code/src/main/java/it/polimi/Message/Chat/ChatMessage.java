@@ -32,6 +32,7 @@ public class ChatMessage extends Message implements Serializable {
 
     @Override
     public void handleException(Participant participant){
+
     }
 
 

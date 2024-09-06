@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 public class Main {
@@ -70,8 +69,6 @@ public class Main {
 
             // Start the server thread
             new Thread(() -> startListening(ip, port, username)).start();
-
-            startup();
         } else if (!choice.equals("y")) {
             throw new RuntimeException("Invalid choice");
         } else {
@@ -88,7 +85,7 @@ public class Main {
                 ReplicationManager.getInstance().getRoomNodes().add(entry);
                 ReplicationManager.getInstance().getUserNodes().add(entry);
             }
-            ReplicationManager.getInstance().addUser(state.getUsername(), state.getIp() + ':' + state.getPort());
+            ReplicationManager.getInstance().addUser(state.getUsername(), state.getMyEndpoint());
             System.out.println("Network created!");
 
             // Start the server thread
@@ -100,10 +97,19 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(LastWill::execute));
 
         NodeHistoryManager.getInstance();
-        scheduler.scheduleAtFixedRate(Main::startup, 10, 30, TimeUnit.SECONDS);
-        new Thread(NodeHistoryManager::resolveUserNodesPartition).start();
-        new Thread(NodeHistoryManager::resolveRoomNodesPartition).start();
+        new Thread(Main::performRecurrentTasks).start();
         readLine();
+    }
+
+    private static void performRecurrentTasks() {
+        while (true) {
+            startup();
+            sleepForRand();
+            NodeHistoryManager.resolveRoomNodesPartition();
+            sleepForRand();
+            NodeHistoryManager.resolveUserNodesPartition();
+            sleepForRand();
+        }
     }
 
     public static void startListening(String ip, int port, String username) {
@@ -164,6 +170,7 @@ public class Main {
 
     @SuppressWarnings("BusyWait")
     public static void startup() {
+        System.out.println("Starting up...");
         RoomStateManager state = RoomStateManager.getInstance();
         String myEndpoint = state.getIp() + ':' + state.getPort();
 
@@ -173,12 +180,14 @@ public class Main {
                     .filter(e -> !e.equals(myEndpoint))
                     .findFirst().orElse(null);
 
-            if (endpoint == null)
+            if (endpoint == null) {
                 endpoint = ReplicationManager.getInstance().getUsersMap().values().stream()
                         .distinct()
                         .filter(e -> !e.equals(myEndpoint))
                         .findFirst().orElse(null);
+            }
         }
+        if (endpoint == null) return;
 
         new RingDataRequestMessage(myEndpoint)
                 .sendMessage(new Participant(0, "-", endpoint));
@@ -200,7 +209,7 @@ public class Main {
         sendBackups();
 
         // Check if any of my rooms have been deleted
-        StableStorage.getInstance().getRoomNames()
+        List.copyOf(StableStorage.getInstance().getRoomNames())
                 .forEach(r ->
                         new CheckForDeletionMessage(r, myEndpoint)
                                 .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(r.charAt(0) - 'a')))
@@ -213,7 +222,7 @@ public class Main {
         update_chats();
 
         // Check for new rooms
-        ReplicationManager.getInstance().getRoomNodes().stream()
+        List.copyOf(ReplicationManager.getInstance().getRoomNodes()).stream()
                 .distinct()
                 .forEach(n ->
                         new GetMyRoomsMessage(state.getUsername(), myEndpoint)
@@ -227,6 +236,14 @@ public class Main {
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseRoomNodeToHelp()));
             new HelpMessage(false, true)
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().chooseUserNodeToHelp()));
+        }
+    }
+
+    private static void sleepForRand() {
+        try {
+            Thread.sleep((long) (Math.random() * 5000) + 15000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -275,11 +292,11 @@ public class Main {
                 .forEach(room -> {
                     UpdateChatRequestMessage message = new UpdateChatRequestMessage(
                             room,
-                            RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort(), // my username
+                            RoomStateManager.getInstance().getMyEndpoint(),
                             ss.getUnsentMessages(room) // all unsent messages
                     );
 
-                    String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
+                    String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
                     ss.getParticipants(room).stream()
                             .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
                             .forEach(p -> new GetUserAddressMessage(p, myEndpoint, room, message)

@@ -10,6 +10,7 @@ public class RoomStateManager {
     private String username;
 
     private RoomStateManager() {
+        isConnected = true;
         currentState = HomeState.getInstance();
     }
 
@@ -26,7 +27,7 @@ public class RoomStateManager {
 
     public void setCurrentState(RoomState newState) {
         this.currentState = newState;
-        System.out.println("State changed to "+newState.getClass().getSimpleName());
+        System.out.println("State changed to " + newState.getClass().getSimpleName());
     }
 
     public String getRoomName() {
@@ -68,5 +69,9 @@ public class RoomStateManager {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getMyEndpoint() {
+        return ip + ":" + port;
     }
 }

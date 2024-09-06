@@ -25,7 +25,7 @@ public class RingUpdateMessage extends Message implements Serializable {
 
     @Override
     public void process(RoomState state) {
-        String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
+        String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
 
         if (roomNodes != null) {
             if (!roomNodes.contains(myEndpoint) && ReplicationManager.getInstance().getRoomNodes().contains(myEndpoint)) { // I have been substituted, I send my data to the new node
@@ -77,11 +77,7 @@ public class RingUpdateMessage extends Message implements Serializable {
     public static void broadcast(Message message) {
         ReplicationManager.getInstance().getUserNodes().stream()
                 .distinct()
+                .filter(s -> !s.equals(RoomStateManager.getInstance().getMyEndpoint()))
                 .forEach(n -> message.sendMessage(new Participant(0, "-", n)));
-    }
-
-    @Override
-    public void handleException(Participant participant) {
-        substituteFailedUserNode(participant.ipAddress());
     }
 }

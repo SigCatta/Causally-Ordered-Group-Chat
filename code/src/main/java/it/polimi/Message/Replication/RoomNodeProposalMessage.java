@@ -1,5 +1,6 @@
 package it.polimi.Message.Replication;
 
+import it.polimi.Entities.Participant;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.ReplicationManager;
@@ -23,4 +24,11 @@ public class RoomNodeProposalMessage extends Message implements Serializable {
         ReplicationManager.getInstance().getRoomsMap().putAll(roomsMap);
         ReplicationManager.getInstance().getDeletedRooms().addAll(deletedRooms);
     }
+
+    @Override
+    public void handleException(Participant participant){
+        ReplicationManager.getInstance().getRoomsMap().putAll(roomsMap);
+        ReplicationManager.getInstance().getDeletedRooms().addAll(deletedRooms);
+    }
+
 }

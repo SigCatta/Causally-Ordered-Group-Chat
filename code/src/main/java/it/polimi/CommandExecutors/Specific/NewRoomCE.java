@@ -19,7 +19,7 @@ public class NewRoomCE implements CommandExecutor {
     public void execute() {
         if (RoomStateManager.getInstance().getCurrentState() == HomeState.getInstance() && RoomStateManager.getInstance().getConnected()) {
             Scanner scanner = new Scanner(System.in);
-            String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
+            String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
 
             System.out.println("Insert the name of the room: ");
             String roomName = scanner.nextLine();
@@ -55,6 +55,9 @@ public class NewRoomCE implements CommandExecutor {
                     .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, message)
                             .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getUserNodes().get(p.name().charAt(0) - 'a')))
                     );
+
+            // Add the room to the map in case the responsible node cannot be reached ~ it will be added eventually when the node is reachable, or I become the responsible node
+            ReplicationManager.getInstance().getRoomsMap().put(roomName, participants.stream().map(Participant::name).toList());
         }
 
     }

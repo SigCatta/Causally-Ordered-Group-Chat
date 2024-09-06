@@ -24,7 +24,7 @@ public class LastWill {
     }
 
     private static void sendLastWill() {
-        String myEndpoint = RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort();
+        String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
         List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
         List<String> userNodes = ReplicationManager.getInstance().getUserNodes();
 
@@ -79,6 +79,9 @@ public class LastWill {
             RingUpdateMessage.broadcast(new RingUpdateMessage(null, userNodes));
         }
 
+        if (ReplicationManager.getInstance().getRoomsMap() != null || ReplicationManager.getInstance().getUsersMap() != null || ReplicationManager.getInstance().getDeletedRooms() != null) {
+            saveDataToDisk();
+        }
     }
 
     public static void saveDataToDisk() {

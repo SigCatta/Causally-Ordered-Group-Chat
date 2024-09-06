@@ -17,22 +17,19 @@ public class GetListRoomNodesMessage extends Message implements Serializable {
         this.sender = sender;
     }
 
-    public String getSender() {
-        return sender;
-    }
-
     @Override
     public void process(RoomState state) {
-        System.out.println("ok");
+        System.out.println("Received request for room nodes");
         // if I'm the leader in the other partitions I will respond unless I'm trying to solve the partition too
-        if (ReplicationManager.getInstance().getRoomNodes().get(0).equals(RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort())) {
-            System.out.println(NodeHistoryManager.getInstance().getSolvingPartitionUser());
+        String leader = ReplicationManager.getInstance().getRoomNodes().getFirst();
+        if (leader.equals(RoomStateManager.getInstance().getMyEndpoint())) {
+            System.out.println("R Sending: " + ReplicationManager.getInstance().getRoomNodes());
             if (!NodeHistoryManager.getInstance().getSolvingPartitionRoom()) {
-                SendListRoomNodesMessage message = new SendListRoomNodesMessage(ReplicationManager.getInstance().getRoomNodes());
-                message.sendMessage(new Participant(0, "-", sender));
+                new SendListRoomNodesMessage(ReplicationManager.getInstance().getRoomNodes())
+                        .sendMessage(new Participant(0, "-", sender));
             }
-        } else {
-            String leader = ReplicationManager.getInstance().getRoomNodes().get(0);
+        } else { // else I redirect the message to the leader
+            System.out.println("Redirecting request to leader");
             this.sendMessage(new Participant(0, "-", leader));
         }
     }

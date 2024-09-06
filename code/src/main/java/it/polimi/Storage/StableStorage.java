@@ -4,6 +4,8 @@ import it.polimi.Entities.DataContainer;
 import it.polimi.Entities.Message;
 import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
+import it.polimi.States.InRoomState;
+import it.polimi.States.RoomStateManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -201,6 +203,7 @@ public class StableStorage {
                     VectorClock currentVC = getCurrentVectorClock(roomId);
 
                     applyMessageDelivery(roomId, msg, newVC, currentVC);
+                    printIfNecessary(msg, roomId);
                 }
                 vc = newVC;
 
@@ -220,6 +223,13 @@ public class StableStorage {
                         .map(Message::text)
                         .toList() // List<String>
         ));
+    }
+
+    private void printIfNecessary(Message msg, String roomId) {
+        if (RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()
+                && RoomStateManager.getInstance().getRoomName().equals(roomId)) {
+            System.out.println(msg.text());
+        }
     }
 
     private void applyMessageDelivery(String roomId, Message msg, VectorClock newVC, VectorClock currentVC) {

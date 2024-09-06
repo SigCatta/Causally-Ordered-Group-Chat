@@ -27,22 +27,28 @@ public abstract class Message implements Serializable {
     public abstract void process(RoomState state);
 
     public void sendMessage(Participant participant) {
-        String[] parts = participant.ipAddress().split(":");
-        int port = Integer.parseInt(parts[1]);
-        try (Socket socket = new Socket(parts[0], port);
-             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
-            out.writeObject(this);
-            out.flush();
-        } catch (Exception e) {
-            handleException(participant);
-            if (e instanceof SocketException) return;
-            e.printStackTrace();
+        if (RoomStateManager.getInstance().getConnected()) {
+            String[] parts = participant.ipAddress().split(":");
+            int port = Integer.parseInt(parts[1]);
+            try (Socket socket = new Socket(parts[0], port);
+                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+                out.writeObject(this);
+                out.flush();
+            } catch (Exception e) {
+                handleException(participant);
+                if (e instanceof SocketException) return;
+                e.printStackTrace();
+            }
         }
     }
 
     public void handleException(Participant participant) {
         substituteFailedUserNode(participant.ipAddress());
         substituteFailedRoomNode(participant.ipAddress());
+        if (ReplicationManager.getInstance().getUserNodes().stream().distinct().count() == 1
+                && ReplicationManager.getInstance().getRoomNodes().stream().distinct().count() == 1) {
+            RoomStateManager.getInstance().setConnected(false);
+        }
     }
 
 
@@ -57,7 +63,7 @@ public abstract class Message implements Serializable {
 
     protected void substituteFailedRoomNode(String failedNode) {
         if (!ReplicationManager.getInstance().getRoomNodes().contains(failedNode)) return;
-        System.out.println("sostituisco room" + failedNode);
+        System.out.println("sostituisco room " + failedNode);
         List<String> nodes = ReplicationManager.getInstance().getRoomNodes();
         substituteNode(failedNode, nodes);
 
@@ -68,19 +74,19 @@ public abstract class Message implements Serializable {
         int lastIndex = nodes.lastIndexOf(failedNode);
 
         if (lastIndex == nodes.size() - 1) {
-            String myEndpoint = RoomStateManager.getInstance().getIp() + ':' + RoomStateManager.getInstance().getPort();
+            String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
             if (nodes.contains(myEndpoint)) { // if I am in the list, replace failed node with the node before
                 IntStream.range(0, nodes.size())
                         .forEach(i -> {
-                            if (nodes.get(i).equals(failedNode)){
+                            if (nodes.get(i).equals(failedNode)) {
                                 if (nodes.stream().distinct().count() == 1) return;
                                 if (i == 0) {
                                     nodes.set(i, nodes.get(nodes.lastIndexOf(failedNode) + 1));
                                     return;
                                 }
-                                try{
+                                try {
                                     nodes.set(i, nodes.get(nodes.indexOf(failedNode) - 1));
-                                } catch (IndexOutOfBoundsException e){
+                                } catch (IndexOutOfBoundsException e) {
                                     nodes.set(i, nodes.get(nodes.lastIndexOf(failedNode) + 1));
                                 }
                             }

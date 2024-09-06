@@ -35,8 +35,4 @@ public class UpdateChatReplyMessage extends Message implements Serializable {
 
         StableStorage.getInstance().deliverDelayedMessages(roomName);
     }
-
-    @Override
-    public void handleException(Participant participant) {
-    }
 }
