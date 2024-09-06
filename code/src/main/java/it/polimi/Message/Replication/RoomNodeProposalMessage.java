@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RoomNodeProposalMessage extends Message implements Serializable {
     private final ConcurrentHashMap<String, List<String>> roomsMap;
     private final Set<String> deletedRooms;
+
     public RoomNodeProposalMessage(ConcurrentHashMap<String, List<String>> roomsMap, Set<String> deletedRooms) {
         super(null);
         this.roomsMap = roomsMap;
@@ -23,10 +24,11 @@ public class RoomNodeProposalMessage extends Message implements Serializable {
     public void process(RoomState state) {
         ReplicationManager.getInstance().getRoomsMap().putAll(roomsMap);
         ReplicationManager.getInstance().getDeletedRooms().addAll(deletedRooms);
+        ReplicationManager.getInstance().getDeletedRooms().forEach(r -> ReplicationManager.getInstance().getRoomsMap().remove(r));
     }
 
     @Override
-    public void handleException(Participant participant){
+    public void handleException(Participant participant) {
         ReplicationManager.getInstance().getRoomsMap().putAll(roomsMap);
         ReplicationManager.getInstance().getDeletedRooms().addAll(deletedRooms);
     }
