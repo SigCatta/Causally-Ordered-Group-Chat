@@ -21,7 +21,6 @@ public class SendListRoomNodesMessage extends Message implements Serializable {
                 System.out.println("Received room nodes from leader, substituting...");
                 NodeHistoryManager.getInstance().newRoomList(roomNodes);
             }
-            System.out.println("done");
         }catch(Exception e){
             e.printStackTrace();
         }

@@ -86,12 +86,10 @@ public class NodeHistoryManager {
         RoomStateManager.getInstance().setConnected(true);
         // checking if I am the leader to solve the partition
         if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
-            System.out.println("Solving user partition...");
-            System.out.println(userNodes);
             solvingPartitionUser = true;
             userNodes.stream().filter(node -> !ReplicationManager.getInstance().getUserNodes().contains(node))
                     .forEach(node -> {
-                        System.out.println("sending to node " + node);
+                        System.out.println("sending user nodes request to" + node);
                         RoomStateManager.getInstance().setConnected(true);
                         new GetListUserNodesMessage(RoomStateManager.getInstance().getMyEndpoint())
                                 .sendMessage(new Participant(0, "-", node));
@@ -110,12 +108,10 @@ public class NodeHistoryManager {
         RoomStateManager.getInstance().setConnected(true);
         // checking if I am the leader to solve the partition
         if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
-            System.out.println("Solving room partition...");
-            System.out.println(roomNodes);
             solvingPartitionRoom = true;
             roomNodes.stream().filter(node -> !ReplicationManager.getInstance().getRoomNodes().contains(node))
                     .forEach(node -> {
-                        System.out.println("sending to node " + node);
+                        System.out.println("sending room nodes request to " + node);
                         RoomStateManager.getInstance().setConnected(true);
                         new GetListRoomNodesMessage(RoomStateManager.getInstance().getMyEndpoint())
                                 .sendMessage(new Participant(0, "-", node));
@@ -130,7 +126,6 @@ public class NodeHistoryManager {
     }
 
     public void newUserList(List<String> newNodes) {
-        System.out.println("newUserList");
         if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(null, newNodes));
             solvingPartitionUser = false;
@@ -139,7 +134,6 @@ public class NodeHistoryManager {
     }
 
     public void newRoomList(List<String> newNodes) {
-        System.out.println("newRoomList");
         if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(newNodes, null));
             solvingPartitionRoom = false;

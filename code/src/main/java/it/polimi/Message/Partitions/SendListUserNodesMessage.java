@@ -27,7 +27,6 @@ public class SendListUserNodesMessage extends Message implements Serializable {
                 System.out.println("Received user nodes from leader, substituting...");
                 NodeHistoryManager.getInstance().newUserList(UserNodes);
             }
-            System.out.println("done");
         }catch(Exception e){
             e.printStackTrace();
         }
