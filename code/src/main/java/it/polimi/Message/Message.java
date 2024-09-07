@@ -58,6 +58,7 @@ public abstract class Message implements Serializable {
         List<String> nodes = ReplicationManager.getInstance().getUserNodes();
         substituteNode(failedNode, nodes);
 
+        if (this instanceof RingUpdateMessage) return;
         RingUpdateMessage.broadcast(new RingUpdateMessage(null, nodes));
     }
 
@@ -67,6 +68,7 @@ public abstract class Message implements Serializable {
         List<String> nodes = ReplicationManager.getInstance().getRoomNodes();
         substituteNode(failedNode, nodes);
 
+        if (this instanceof RingUpdateMessage) return;
         RingUpdateMessage.broadcast(new RingUpdateMessage(nodes, null));
     }
 
@@ -76,7 +78,7 @@ public abstract class Message implements Serializable {
         if (lastIndex == nodes.size() - 1) {
             String myEndpoint = RoomStateManager.getInstance().getMyEndpoint();
             if (nodes.contains(myEndpoint)) { // if I am in the list, replace failed node with the node before
-                IntStream.range(0, nodes.size())
+                IntStream.range(0, nodes.size() - 1)
                         .forEach(i -> {
                             if (nodes.get(i).equals(failedNode)) {
                                 if (nodes.stream().distinct().count() == 1) return;
@@ -92,14 +94,14 @@ public abstract class Message implements Serializable {
                             }
                         });
             } else { // If I am not in the last, I substitute the failed node
-                IntStream.range(0, nodes.size())
+                IntStream.range(0, nodes.size() - 1)
                         .forEach(i -> {
                             if (nodes.get(i).equals(failedNode))
                                 nodes.set(i, myEndpoint);
                         });
             }
         } else { // if the failed node is not the last one, replace it with the next one
-            IntStream.range(0, nodes.size())
+            IntStream.range(0, nodes.size() - 1)
                     .forEach(i -> {
                         if (nodes.get(i).equals(failedNode))
                             nodes.set(i, nodes.get(lastIndex + 1));
