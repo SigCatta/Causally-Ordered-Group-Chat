@@ -47,7 +47,7 @@ public class VectorClockTest {
     }
 
     @Test
-    public void testMerge(){
+    public void testMerge() {
         VectorClock vc1 = new VectorClock(List.of(0, 0, 0));
         VectorClock vc2 = new VectorClock(List.of(1, 0, 0));
 

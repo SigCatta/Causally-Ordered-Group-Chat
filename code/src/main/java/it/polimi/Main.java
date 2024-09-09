@@ -25,15 +25,12 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.IntStream;
 
 public class Main {
     private static ServerSocket serverSocket;
     private static Thread listeningThread;
     public static String endpoint;
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);

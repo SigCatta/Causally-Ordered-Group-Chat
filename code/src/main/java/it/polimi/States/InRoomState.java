@@ -1,17 +1,15 @@
 package it.polimi.States;
 
-import it.polimi.Entities.Participant;
 import it.polimi.Entities.VectorClock;
 import it.polimi.Main;
-import it.polimi.Message.*;
-import it.polimi.Message.Chat.*;
+import it.polimi.Message.Chat.ChatMessage;
+import it.polimi.Message.Chat.DeleteMessage;
+import it.polimi.Message.Chat.NewRoomMessage;
+import it.polimi.Message.HelloMessage;
 import it.polimi.Message.RoomNodes.DeleteNodeMessage;
 import it.polimi.Message.RoomNodes.NewRoomNodeMessage;
-import it.polimi.Message.UserNodes.GetUserAddressMessage;
 import it.polimi.Storage.ReplicationManager;
 import it.polimi.Storage.StableStorage;
-
-import java.util.List;
 
 public class InRoomState implements RoomState {
     private static InRoomState instance;
@@ -30,9 +28,9 @@ public class InRoomState implements RoomState {
 
     @Override
     public void handle(NewRoomMessage message) {
-            System.out.println("NOTIFICATION : " + message.getContent());
-            StableStorage storage = StableStorage.getInstance();
-            storage.initNewRoom(message.getRoomName(), message.getParticipants());
+        System.out.println("NOTIFICATION : " + message.getContent());
+        StableStorage storage = StableStorage.getInstance();
+        storage.initNewRoom(message.getRoomName(), message.getParticipants());
     }
 
     @Override
@@ -65,8 +63,8 @@ public class InRoomState implements RoomState {
     }
 
     @Override
-    public void handle(NewRoomNodeMessage message){
-        ReplicationManager.getInstance().addRoom(message.getRoomName(),message.getParticipants());
+    public void handle(NewRoomNodeMessage message) {
+        ReplicationManager.getInstance().addRoom(message.getRoomName(), message.getParticipants());
     }
 
     @Override

@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.concurrent.Semaphore;
 import java.util.stream.Stream;
 
 class StorageWriter {

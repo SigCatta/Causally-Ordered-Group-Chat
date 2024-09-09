@@ -15,7 +15,7 @@ public class ChatMessage extends Message implements Serializable {
 
     public ChatMessage(it.polimi.Entities.Message message, String sender, String roomName) {
         super("new message in chat");
-        this.message= message;
+        this.message = message;
         this.sender = sender;
         this.roomName = roomName;
     }
@@ -27,11 +27,11 @@ public class ChatMessage extends Message implements Serializable {
 
     @Override
     public void process(RoomState state) {
-            state.handle(this);
+        state.handle(this);
     }
 
     @Override
-    public void handleException(Participant participant){
+    public void handleException(Participant participant) {
 
     }
 

@@ -11,12 +11,14 @@ import java.util.List;
 public class NewRoomNodeMessage extends Message implements Serializable {
     String roomName;
     List<String> participants;
+
     public NewRoomNodeMessage(String roomName, List<String> participants) {
         super("You have a new room to add!");
         this.roomName = roomName;
         this.participants = participants;
     }
-    public String getRoomName(){
+
+    public String getRoomName() {
         return roomName;
     }
 
@@ -32,6 +34,6 @@ public class NewRoomNodeMessage extends Message implements Serializable {
     @Override
     public void handleException(Participant participant) {
         substituteFailedRoomNode(participant.ipAddress());
-        ReplicationManager.getInstance().addRoom(roomName,participants);
+        ReplicationManager.getInstance().addRoom(roomName, participants);
     }
 }

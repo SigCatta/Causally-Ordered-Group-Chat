@@ -49,7 +49,7 @@ class StorageReader {
                 .toList();
     }
 
-    public int getNumOfUsers(String roomId){
+    public int getNumOfUsers(String roomId) {
         return catFile(Paths.get(PATH, roomId, "usernames.txt")).size();
     }
 
@@ -68,8 +68,8 @@ class StorageReader {
 
     // Returns a list of all messages that have not been sent yet
     public List<Message> getUnsentMessages(String roomId) {
-        Iterator<String> messages = catFile(Paths.get(PATH,roomId, "unsent_msg.txt")).iterator();
-        Iterator<String> vectorClocks = catFile(Paths.get(PATH,roomId, "unsent_vc.txt")).iterator();
+        Iterator<String> messages = catFile(Paths.get(PATH, roomId, "unsent_msg.txt")).iterator();
+        Iterator<String> vectorClocks = catFile(Paths.get(PATH, roomId, "unsent_vc.txt")).iterator();
 
         List<Message> unsentMessages = new ArrayList<>();
         while (messages.hasNext() && vectorClocks.hasNext()) {

@@ -16,9 +16,9 @@ import java.util.List;
 public class DeleteRoomCE implements CommandExecutor {
     @Override
     public void execute() {
-        if(RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()){
+        if (RoomStateManager.getInstance().getCurrentState() == InRoomState.getInstance()) {
             String roomName = RoomStateManager.getInstance().getRoomName();
-            int x = roomName.charAt(0)-97;
+            int x = roomName.charAt(0) - 97;
             StableStorage storage = StableStorage.getInstance();
             DeleteMessage message = new DeleteMessage(roomName);
             List<Participant> participants = storage.getParticipants(roomName);
@@ -26,16 +26,16 @@ public class DeleteRoomCE implements CommandExecutor {
             List<String> roomNodes = ReplicationManager.getInstance().getRoomNodes();
             String address = roomNodes.get(x);
             DeleteNodeMessage m = new DeleteNodeMessage(roomName);
-            m.sendMessage(new Participant(0,"x",address));
+            m.sendMessage(new Participant(0, "x", address));
 
             RoomStateManager.getInstance().setCurrentState(HomeState.getInstance());
 
             // Delete the room to the map in case the responsible node cannot be reached ~ it will be added eventually when the node is reachable, or I become the responsible node
-            if(!RoomStateManager.getInstance().getConnected()){
+            if (!RoomStateManager.getInstance().getConnected()) {
                 ReplicationManager.getInstance().deleteRoom(roomName);
             }
 
-            String myEndpoint = RoomStateManager.getInstance().getIp()+":"+RoomStateManager.getInstance().getPort();
+            String myEndpoint = RoomStateManager.getInstance().getIp() + ":" + RoomStateManager.getInstance().getPort();
             participants.stream()
                     .filter(participant -> !participant.name().equals(RoomStateManager.getInstance().getUsername()))
                     .forEach(p -> new GetUserAddressMessage(p, myEndpoint, roomName, message)

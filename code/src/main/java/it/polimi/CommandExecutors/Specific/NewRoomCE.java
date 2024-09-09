@@ -39,8 +39,8 @@ public class NewRoomCE implements CommandExecutor {
                     .sendMessage(new Participant(0, "-", ReplicationManager.getInstance().getRoomNodes().get(roomName.charAt(0) - 'a')));
 
             // Add the room to the map in case the responsible node cannot be reached ~ it will be added eventually when the node is reachable, or I become the responsible node
-            if(!RoomStateManager.getInstance().getConnected()){
-                ReplicationManager.getInstance().addRoom(roomName,users);
+            if (!RoomStateManager.getInstance().getConnected()) {
+                ReplicationManager.getInstance().addRoom(roomName, users);
             }
 
             // Create a list of all participants (with null ip and port)

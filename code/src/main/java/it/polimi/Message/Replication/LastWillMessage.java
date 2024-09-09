@@ -36,7 +36,7 @@ public class LastWillMessage extends Message implements Serializable {
     }
 
     @Override
-    public void handleException(Participant p){
+    public void handleException(Participant p) {
         LastWill.saveDataToDisk();
     }
 }

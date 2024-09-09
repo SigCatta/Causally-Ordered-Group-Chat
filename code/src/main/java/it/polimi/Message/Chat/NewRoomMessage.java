@@ -10,25 +10,28 @@ import java.util.List;
 public class NewRoomMessage extends Message implements Serializable {
     String roomName;
     List<Participant> participants;
+
     public NewRoomMessage(String roomName, List<Participant> participants) {
         super("You are part of a new room!");
         this.roomName = roomName;
         this.participants = participants;
     }
-    public String getRoomName(){
+
+    public String getRoomName() {
         return roomName;
     }
 
     public List<Participant> getParticipants() {
         return participants;
     }
+
     @Override
     public void process(RoomState state) {
         state.handle(this);
     }
 
     @Override
-    public void handleException(Participant participant){
+    public void handleException(Participant participant) {
     }
 
 }

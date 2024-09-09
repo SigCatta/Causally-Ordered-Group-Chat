@@ -1,7 +1,6 @@
 package it.polimi.Message.Replication;
 
 import it.polimi.Entities.Participant;
-import it.polimi.LastWill;
 import it.polimi.Message.Message;
 import it.polimi.States.RoomState;
 import it.polimi.Storage.ReplicationManager;
@@ -11,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class UserNodeProposalMessage extends Message implements Serializable {
     private final ConcurrentHashMap<String, String> usersMap;
+
     public UserNodeProposalMessage(ConcurrentHashMap<String, String> usersMap) {
         super(null);
         this.usersMap = usersMap;
@@ -22,7 +22,7 @@ public class UserNodeProposalMessage extends Message implements Serializable {
     }
 
     @Override
-    public void handleException(Participant participant){
+    public void handleException(Participant participant) {
         ReplicationManager.getInstance().getUsersMap().putAll(usersMap);
     }
 }

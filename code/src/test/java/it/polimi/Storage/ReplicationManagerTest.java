@@ -31,9 +31,9 @@ public class ReplicationManagerTest {
 
         List<String> arr = new ArrayList<>(26);
 
-        arr.add( "node1");
-        arr.add( "node1");
-        arr.add( "node1");
+        arr.add("node1");
+        arr.add("node1");
+        arr.add("node1");
 
         replicationManager.setRoomNodes(arr);
         replicationManager.setUserNodes(arr);

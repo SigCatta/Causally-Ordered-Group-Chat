@@ -8,11 +8,13 @@ import java.io.Serializable;
 
 public class DeleteMessage extends Message implements Serializable {
     private String roomName;
+
     public DeleteMessage(String roomName) {
-        super(roomName+" deleted!");
+        super(roomName + " deleted!");
         this.roomName = roomName;
 
     }
+
     public String getRoomName() {
         return roomName;
     }
@@ -23,7 +25,7 @@ public class DeleteMessage extends Message implements Serializable {
     }
 
     @Override
-    public void handleException(Participant participant){
+    public void handleException(Participant participant) {
     }
 
 }

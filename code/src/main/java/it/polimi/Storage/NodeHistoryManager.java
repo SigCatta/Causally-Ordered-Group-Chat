@@ -89,7 +89,7 @@ public class NodeHistoryManager {
             solvingPartitionUser = true;
             userNodes.stream().filter(node -> !ReplicationManager.getInstance().getUserNodes().contains(node))
                     .forEach(node -> {
-                        System.out.println("sending user nodes request to" + node);
+                        System.out.println("sending user nodes request to " + node);
                         RoomStateManager.getInstance().setConnected(true);
                         new GetListUserNodesMessage(RoomStateManager.getInstance().getMyEndpoint())
                                 .sendMessage(new Participant(0, "-", node));

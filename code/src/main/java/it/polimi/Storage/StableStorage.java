@@ -81,16 +81,6 @@ public class StableStorage {
         return sr.getParticipants(roomId);
     }
 
-    public Participant getParticipant(String roomId, String username) {
-        List<Participant> participants = getParticipants(roomId);
-        for (Participant p : participants) {
-            if (p.name().equals(username)) {
-                return p;
-            }
-        }
-        return null;
-    }
-
     // Updates a participant's ip address
     public void updateParticipantIp(String roomId, Participant participant) {
         StringBuilder sb = new StringBuilder();
@@ -180,12 +170,6 @@ public class StableStorage {
     // Returns a list of all unsent messages
     public List<Message> getUnsentMessages(String roomId) {
         return sr.getUnsentMessages(roomId);
-    }
-
-    // Deletes all unsent messages
-    public void deleteUnsentMessages(String roomId) {
-        sw.overwrite(Paths.get(roomId, "unsent_msg.txt"), "");
-        sw.overwrite(Paths.get(roomId, "unsent_vc.txt"), "");
     }
 
     // Deliver all deliverable delayed messages

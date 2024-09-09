@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class DeleteNodeMessage extends Message implements Serializable {
     private final String roomName;
 
-    public DeleteNodeMessage(String roomName){
+    public DeleteNodeMessage(String roomName) {
         super("You have a room to delete!");
         this.roomName = roomName;
     }
