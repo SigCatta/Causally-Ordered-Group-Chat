@@ -78,7 +78,7 @@ public class RingUpdateMessage extends Message implements Serializable {
     }
 
     public static void broadcast(Message message) {
-        ReplicationManager.getInstance().getUserNodes().stream()
+        List.copyOf((ReplicationManager.getInstance().getUserNodes())).stream()
                 .distinct()
                 .filter(s -> !s.equals(RoomStateManager.getInstance().getMyEndpoint()))
                 .forEach(n -> message.sendMessage(new Participant(0, "-", n)));
