@@ -128,6 +128,8 @@ public class NodeHistoryManager {
     public void newUserList(List<String> newNodes) {
         if (ReplicationManager.getInstance().getUserNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(null, newNodes));
+            new RingUpdateMessage(null, newNodes)  // send to self, so the nodes are updated
+                    .sendMessage(new Participant(0, "-", RoomStateManager.getInstance().getMyEndpoint()));
             solvingPartitionUser = false;
             s_user.release();
         }
@@ -136,6 +138,8 @@ public class NodeHistoryManager {
     public void newRoomList(List<String> newNodes) {
         if (ReplicationManager.getInstance().getRoomNodes().getFirst().equals(RoomStateManager.getInstance().getMyEndpoint())) {
             RingUpdateMessage.broadcast(new RingUpdateMessage(newNodes, null));
+            new RingUpdateMessage(newNodes, null) // send to self, so the nodes are updated
+                    .sendMessage(new Participant(0, "-", RoomStateManager.getInstance().getMyEndpoint()));
             solvingPartitionRoom = false;
             s_room.release();
         }
